@@ -1,0 +1,20 @@
+.nav-pills {
+	background-color: blue;
+}
+
+.notification-badge {
+    font-size: .6em;
+
+    position: relative;
+		top: -.7em;
+    right: .9em;
+    width: 8em;
+    height: 4em;
+    line-height: 2em;
+    border-radius: 35%;
+    text-align: center;
+		color: white;
+		font-weight: bold;
+
+    background: rgba(244,66,66,0.85);
+}

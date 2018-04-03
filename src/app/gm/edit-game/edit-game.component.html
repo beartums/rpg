@@ -1,0 +1,39 @@
+<div class="container" *ngIf="game.edited">
+	<div class="row">
+		<div class="col-md-3">Name:</div>
+		<div class="col-md-6"><input class="form-control" [(ngModel)]="game.edited.name"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-3">Description:</div>
+		<div class="col-md-6"><input class="form-control" [(ngModel)]="game.edited.description"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-3">Started at:</div>
+		<div class="col-md-6"><input class="form-control" type="date" [(ngModel)]="game.edited.startDate"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-3">Characters:</div>
+		<div class="col-md-6">
+			<ng-container *ngIf="characters$ | async as characterPlayers; else loading">
+				<ng-container *ngIf="characterPlayers.length; else noCharacters">
+					<div class="row" *ngFor="let cp of characterPlayers">
+						<div class="col-md-12">{{cp.character.name}} ({{cp.user.profile.displayName}}) </div>
+					</div>
+				</ng-container>
+			</ng-container>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<button class="btn btn-default" (click)="resetGame()">Reset</button>
+			<button class="btn btn-danger" (click)="cancelChanges()">Cancel</button>
+			<button class="btn btn-primary" (click)="saveChanges(game.edited, game.original)">Save</button>
+		</div>
+	</div>
+</div>
+<ng-template #loading>
+	<span class="fa fa-spin fa-spinner"></span>
+</ng-template>
+<ng-template #noCharacters>
+	<span >No characters found...</span>
+</ng-template>

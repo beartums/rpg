@@ -1,0 +1,1 @@
+firebase-server -e -v -p 5000 -f src/app/data/firebaseBackup-20180329.js

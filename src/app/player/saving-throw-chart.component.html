@@ -1,0 +1,14 @@
+
+	<table class="table table-specs">
+		<tr *ngFor="let savingThrow of savingThrowList">
+			<td>
+				{{savingThrow.savingThrowName | caseConvert: 'FC'}}
+			</td>
+			<td>
+				{{savingThrow.rollTarget}}
+			</td>
+			<td>
+				{{ (savingThrow.attributeMod + savingThrow.raceMod + savingThrow.classMod) | modifier }}
+			</td>
+		</tr>
+	</table>

@@ -1,0 +1,108 @@
+<div class="container" *ngIf="game$ | async as game; else loading">
+	<div class="row align-items-center">
+		<div class="col-6">
+			<h2>{{game.name}}</h2>
+		</div>
+		<div class="col-2 text-right">
+			<span>
+				<select class="form-control form-control-sm" [(ngModel)]="game.gameStatus"
+					(change)="changeGameStatus(game)">
+					<option *ngFor="let stat of getStatuses()" [ngValue]="GAME_STATUS[stat]">
+						{{stat}}
+					</option>
+				</select>
+			</span>
+		</div>
+		<div class="col-4">
+			<div class="btn-toolbar btn-toolbar-sm">
+				<div class="btn-group btn-group-sm ml-auto">
+					<button type="button" class="btn btn-default btn-sm" (click)="newCharacter()">
+						<span class="fa fa-user-plus"></span>
+					</button>
+					<button type="button" class="btn btn-default btn-sm" (click)="findExistingCharacter()">
+						<span class="fa fa-search"></span>
+					</button>
+				</div>
+				<div class="btn-group btn-group-sm">
+					<button type="button" class="btn btn-default btn-sm ml-2" [disabled]="!selectedCharacter">
+						<span class="fa fa-trash" (click)="ejectCharacter(selectedCharacter)"></span>
+					</button>
+					<button type="button" class="btn btn-default btn-sm" [disabled]="!selectedCharacter">
+						<span class="fa fa-bomb" (click)="destroyCharacter(selectedCharacter)"></span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<table class="table table-sm">
+				<tr>
+					<th>Character</th>
+					<th>Race</th>
+					<th>Class</th>
+					<th>Alignment</th>
+					<th><span class="ra ra-muscle-up"></span></th>
+					<th><span class="ra ra-feather-wing"></span></th>
+					<th><span class="ra ra-raven"></span></th>
+					<th><span class="ra ra-rune-stone"></span></th>
+					<th><span class="ra ra-kettlebell"></span></th>
+					<th><span class="ra ra-aura"></span></th>
+					<th><span class="fa fa-heartbeat"></span> </th>
+					<th><span class="ra ra-player-lift"></span> </th>
+					<th><span class=""></span> </th>
+					<th></th>
+				</tr>
+				<ng-container  *ngIf="characters$ | async as characters; else loadingTableRow">
+					<tr *ngFor="let character of characters"
+						(click)="select(character)" 
+						[ngClass]="selectedCharacter==character ? 'bg-success text-white' : ''">
+						<td>{{character.name}}</td>
+						<td>{{character.raceName}}</td>
+						<td>{{character.className}}</td>
+						<td>{{character.alignmentLaw}}/{{character.alignmentGood}}</td>
+						<td>{{ getAttributeValue('STR',character.attributes) }}</td> 
+						<td>{{ getAttributeValue('DEX',character.attributes) }}</td> 
+						<td>{{ getAttributeValue('INT',character.attributes) }}</td> 
+						<td>{{ getAttributeValue('WIS',character.attributes) }}</td> 
+						<td>{{ getAttributeValue('CON',character.attributes) }}</td>
+						<td>{{ getAttributeValue('CHA',character.attributes) }}</td>
+						<td>{{ character.hitPoints }}</td>
+						<td>{{ character.level }}</td>
+						<td><span class="fa" [ngClass]="'fa-battery-' + (character.stage || 0)"></span></td>
+					</tr>
+				</ng-container>
+				<tr *ngIf="addingExistingCharacter">
+					<td> 
+						<div class="input-group input-group-sm" *ngIf="addingExistingCharacter">
+							<div class="input-group input-group-sm" 
+										*ngIf="existingCharacters$ | async as existingCharacters; else loading">
+								<select class="form-control form-control-sm" [(ngModel)]="existingCharacterId"
+									(change)="selectExistingCharacter($event)">
+									<option *ngFor="let char of existingCharacters" 
+													[ngValue]="char.key">
+										{{char.name}}
+									</option>
+								</select>
+								<div class="input-group-append" (click)="addingExistingCharacter = false">
+									<button class="btn btn-default btn-sm">
+										<span class="fa  fa-times"></span>
+									</button>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td colspan="12"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+<edit-character *ngIf="selectedCharacter" [(character)]="selectedCharacter">
+</edit-character>
+<ng-template #loadingTableRow>
+	<tr><span class="fa fa-spin fa-spinner"></span></tr>
+</ng-template>
+<ng-template #loading>
+	<span class="fa fa-spin fa-spinner"></span>
+</ng-template>

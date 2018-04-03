@@ -1,0 +1,7 @@
+.form-control-xs, .btn-group-xs, .btn-xs {
+  height: 20px;
+  padding: 1px 3px;
+  font-size: 10px;
+  line-height: 1.4; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 2px;
+}

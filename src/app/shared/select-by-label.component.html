@@ -1,0 +1,9 @@
+<span *ngFor="let obj of options">
+	<span *ngIf="isOptionVisible(obj)" 
+		class="badge badge-default badge-clickable" 
+		[ngClass]="{'badge-success': isSelected(obj), 'disabled': isDisabled(obj)}" 
+		(click)="toggleSelection(obj,isDisabled(obj));">
+		{{getDisplayValue(obj)}}
+	</span>
+	<br *ngIf="direction == 'v' && isOptionVisible(obj)" />
+</span>

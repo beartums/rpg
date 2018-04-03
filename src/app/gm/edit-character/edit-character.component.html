@@ -1,0 +1,100 @@
+<div class="container">
+<hr />
+	<div class="row">
+		<div class="col-2">
+			<label for="name">Name</label>
+			<input type="text" class="form-control form-control-sm" id="name" [(ngModel)]="_character.name">
+		</div>
+		<div class="col-2">
+			<label for="nickname">NickName</label>
+			<input type="text" class="form-control form-control-sm" id="nickname" [(ngModel)]="_character.nickname">
+		</div>
+		<div class="col-2">
+			<label for="race">Race</label>
+			<select class="form-control form-control-sm" id="race" [(ngModel)]="_character.raceName">
+				<option *ngFor="let race of getRaces()" [ngValue]="race.name">{{race.name}}</option>
+			</select>
+		</div>
+		<div class="col-2">
+			<label for="class">Class</label>
+			<select class="form-control form-control-sm" id="class" [(ngModel)]="_character.className">
+				<option *ngFor="let class of getClasses()" [ngValue]="class.name">{{class.name}}</option>
+			</select>
+		</div>
+		<div class="col-4">
+			<label>Alignment</label>
+			<div class="form-row">
+				<div class="col">
+					<select class="form-control form-control-sm" id="class" [(ngModel)]="_character.alignmentLaw">
+						<option *ngFor="let law of alignments.law" [ngValue]="law">{{law}}</option>
+					</select>
+				</div>
+				<div class="col">
+					<select class="form-control form-control-sm" id="class" [(ngModel)]="_character.alignmentGood">
+						<option *ngFor="let good of alignments.good" [ngValue]="good">{{good}}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6">
+				<div class="row">
+					<div class="col-2" *ngFor="let attribute of _character.attributes">
+						<label>{{attribute.key}}</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="attribute.value">
+					</div>
+				</div>
+		</div>
+		<div class="col-2"></div>
+		<div class="col-4">
+				<div class="row">
+					<div class="col-3">
+						<label>HP</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.hitPoints">
+					</div>
+					<div class="col-3">
+						<label>XP</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.experiencePoints">
+					</div>
+					<div class="col-3">
+						<label>Level</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.level">
+					</div>
+					<div class="col-3">
+						<label>Stage</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.stage">
+					</div>
+				</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-4">
+			<label for="player">Played By</label>
+			<select class="form-control form-control-sm" id="player" [(ngModel)]="_character.userId">
+				<option *ngFor="let player of players$ | async" [ngValue]="player.key">
+					{{player.profile.displayName}} ({{player.profile.email}})
+				</option>
+			</select>
+		</div>
+		<div class="col-2">
+			<div class="row">
+				<div class="col-6">
+					<label for="atRolls">Att. Rolls</label>
+					<input class="form-control form-control-sm" id="atRolls" [(ngModel)]="_character.attributeRolls">
+				</div>
+				<div class="col-6">
+					<label for="xpRolls">Xp Rolls</label>
+					<input class="form-control form-control-sm" id="xpRolls" [(ngModel)]="_character.xpRolls">
+				</div>
+			</div>
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<button type="button" class="btn btn-default" [disabled]="this.isChanged()" (click)="reset()">Reset</button>
+		&nbsp;
+		<button type="button" class="btn btn-default" (click)="cancel()">Cancel</button>
+		&nbsp;
+		<button type="button" class="btn btn-success" [disabled]="this.isChanged()" (click)="save()">save</button>
+</div>

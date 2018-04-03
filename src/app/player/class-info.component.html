@@ -1,0 +1,107 @@
+<div class="row" *ngIf="charClass">
+	<div class="col-md-12 col-sm-12">
+		<small>
+			<h3><small>{{charClass.name}}
+				<small><span class="fa" [ngClass]="descriptionOpen ? 'fa-minus-square' : 'fa-plus-square'" (click)="descriptionOpen=!descriptionOpen"></span>
+				</small>
+			</small></h3>
+			<p *ngIf="descriptionOpen">{{charClass.description}}</p>
+			<small>
+				<dl class="dl-horizontal">
+
+					<!--Additional Skills-->
+					<span *ngIf="charClass.additionalSkills && charClass.additionalSkills.length>0">
+						<dt>
+							Additional Skills:
+						</dt>
+						<dd>
+							<span *ngFor="let skill of charClass.additionalSkills">
+								{{skill}}<br />
+							</span>
+						</dd>
+					</span>
+
+					<table class="table table-sm">
+						<tr  *ngIf="charClass.weaponNotes && charClass.weaponNotes.length > 0">
+							<td>
+								Weapons:
+							</td>
+							<td>
+								{{charClass.weaponNotes}}
+							</td>
+						</tr>
+						<tr  *ngIf="charClass.armorNotes && charClass.armorNotes.length > 0">
+							<td>
+								Armor:
+							</td>
+							<td>
+								{{charClass.armorNotes}}
+							</td>
+						</tr>
+						<tr  *ngIf="charClass.primeRequisites && charClass.primeRequisites.length > 0">
+							<td>
+								Prime Reqs:
+							</td>
+							<td>
+								<span *ngFor="let att of charClass.primeRequisites; let l = last">
+									{{att}}<span *ngIf="!l">, </span>
+								</span>
+							</td>
+						</tr>
+
+						<tr  *ngIf="(charClass.attributeRequirements | objectAsValues).length > 0">
+							<td>
+								Attr. Reqs:
+							</td>
+							<td>
+								<span *ngFor="let obj of charClass.attributeRequirements | objectAsValues; let l = last">
+									{{obj.key}}: {{obj.value}}<span *ngIf="!l">; </span>
+								</span>
+							</td>
+						</tr>
+						<tr *ngIf="spells && spells.length > 0">
+							<td colspan="2">
+								<table>
+									<tr>
+										<th colspan="3">
+											Spells
+										</th>
+									</tr>
+									<ng-container *ngFor="let spell of spells; let i = index">
+										<tr *ngIf="i==0 || spell.level != spells[i-1].level" (click)="toggleSpellLevelVisible(spell.level)">
+											<td colspan=4>
+												<strong>
+													<span class="fa" [ngClass]="'fa-' + (isSpellLevelVisible(spell.level) ? 'minus' : 'plus')">
+													</span>
+													LEVEL {{spell.level}}
+												</strong>
+											</td>
+										</tr>
+										<tr *ngIf="isSpellLevelVisible(spell.level)  && (i==0 || spell.level != spells[i-1].level)">
+											<th></th>
+											<th>Name</th>
+											<th>Range</th>
+											<th>Duration</th>
+										</tr>
+										<tr (click)="spell.showDescription = !spell.showDescription;" *ngIf="isSpellLevelVisible(spell.level)">
+											<td>&nbsp;</td>
+											<td>{{spell.name}}</td>
+											<td>{{spell.range}}</td>
+											<td>{{spell.duration}}</td>
+										</tr>
+										<tr *ngIf="spell.showDescription && isSpellLevelVisible(spell.level)">
+											<td colspan="4">
+												{{spell.description}}
+											</td>
+										</tr>
+									</ng-container>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</dl>
+			</small>
+		</small>
+
+	</div>
+</div>

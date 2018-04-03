@@ -1,0 +1,91 @@
+<div class="row" *ngIf="race">
+	<div class="col-md-12 col-sm-12">
+		<small>
+			<h3><small>{{race.name}}
+				<small><span class="fa" [ngClass]="descriptionClosed ? 'fa-plus-square' : 'fa-minus-square'" (click)="descriptionClosed=!descriptionClosed"></span>
+				</small>
+			</small></h3>
+			<p *ngIf="!descriptionClosed">{{race.description}}</p>
+			<small>
+				<dl class="dl-horizontal">
+
+					<!--Additional Skills-->
+					<span *ngIf="race.additionalSkills && race.additionalSkills.length>0">
+						<dt>
+							Additional Skills:
+						</dt>
+						<dd>
+							<span *ngFor="let skill of race.additionalSkills">
+								{{skill}}<br />
+							</span>
+						</dd>
+					</span>
+
+					<!--Attributes details-->
+					<span *ngIf="(race.attributeEffects | objectAsValues:'key').length > 0">
+						<dt>
+							Attributes (Min/Max Mod)
+						</dt>
+						<dd>
+							<table class="table table-sm table-bordered text-center">
+								<thead class="thead-inverse">
+									<tr>
+										<th [style.width.%]="1/(race.attributeEffects | objectAsValues:'key').length" class="text-center" *ngFor="let attribute of race.attributeEffects | objectAsValues:'key'">
+											{{attribute.key}}
+										</th>
+									</tr>
+								</thead>
+								<tr>
+									<td  *ngFor="let attribute of race.attributeEffects | objectAsValues:'key'">
+										<strong>
+											{{attribute.minValue}}/{{attribute.maxValue}}
+											{{attribute.modValue | modifier }}
+										</strong>
+									</td>
+								</tr>
+							</table>
+						</dd>
+					</span>
+
+					<!--SavingThrow details-->
+					<span *ngIf="(race.savingThrowMods | objectAsValues).length > 0">
+						<dt>
+							Saving Throw Modifiers
+						</dt>
+						<dd>
+							<table class="table table-sm table-bordered text-center">
+								<thead class="thead-inverse">
+									<tr>
+										<th [style.width.%]="1/(race.savingThrowMods | objectAsValues:'key').length" class="text-center" *ngFor="let stMod of race.savingThrowMods | objectAsValues:'key'">
+											{{stMod.key | caseConvert:"IC"}}
+										</th>
+									</tr>
+								</thead>
+								<tr>
+									<td  *ngFor="let stMod of race.savingThrowMods | objectAsValues:'key'">
+										<strong>
+											{{stMod.value | modifier }}
+										</strong>
+									</td>
+								</tr>
+							</table>
+						</dd>
+					</span>
+
+					<!--Attributes details-->
+					<span *ngIf="race.languages.length > 0">
+						<dt>
+							Languages
+						</dt>
+						<dd>
+							<span *ngFor="let language of race.languages; let l = last;">
+								{{language}}<span *ngIf="!l">, </span>
+							</span>								
+						</dd>
+					</span>
+				</dl>
+			</small>
+		</small>
+
+	</div>
+</div>

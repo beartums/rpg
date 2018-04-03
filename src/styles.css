@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css?family=Eagle+Lake');
+
+h1 {
+  color: #369;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 250%;
+}
+
+.fancy {
+	font-family: 'Eagle Lake', cursive;
+}
+
+.btn-xs {
+	font-size: 10px;
+	padding: 2px 4px;
+}
+	

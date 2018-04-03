@@ -1,0 +1,81 @@
+<div class="container w-100">
+			<table class="w-100">
+				<tr>
+					<th colspan="7">
+						<h4><span *ngIf="title">{{title}}</span>
+							<small *ngIf="showTotals && cart.size>0">
+								<span [ngClass]="getValueClass(cart,character)">
+												{{ (getValue(cart)) | number:'1.0-2'}}
+								</span>
+								gp; &nbsp;
+								<span [ngClass]="getWeightClass(cart,character)">
+									{{(getWeight(cart)) | number:'1.0-1'}}
+								</span>
+								lbs
+							</small>
+						</h4>
+					</th>
+				</tr>
+				<ng-container *ngFor="let item of equipment; let i = index">
+					<tr *ngIf="(i==0 || item.type != equipment[i-1].type) && isGrouped" (click)="toggleItemTypeVisible(item.type)">
+						<td colspan="5">
+							<strong>
+								<span class="fa" [ngClass]="'fa-' + (isItemTypeVisible(item.type) ? 'minus-square' : 'plus-square')">
+								</span>
+								{{item.type}}
+							</strong>
+						</td>
+					</tr>
+					<tr *ngIf="(i==0 && ! isGrouped) || 
+								(isItemTypeVisible(item.type)  
+								&& (i==0 || item.type != equipment[i-1].type)
+								&& isGrouped)">
+						<th colspan="2"></th>
+						<th>Name</th>
+						<th colspan="2" class="text-center">Cost</th>
+						<th>Lbs</th>
+						<th>Properties</th>
+						<th *ngIf="showQuantity" class="text-right">Qty</th>
+					</tr>
+					<tr (click)="toggleShowDescription(item)"  class="align-middle"
+							*ngIf="isItemTypeVisible(item.type) || !isGrouped">
+						<td >&nbsp;</td>
+						<td class="align-middle">
+							<span *ngIf="item.notes" class="fa fa-info-circle" 
+										[ngClass]="{'text-default': !isOpenMap.get(item), 'text.success': isOpenMap.get(item)}">
+							</span>
+							<span *ngIf="!item.notes">
+								&nbsp;
+							</span>
+						</td>
+						<td class="align-middle">{{item.name}} {{getItemQuantity(item)}}</td>
+						<td class="text-right align-middle">{{item.cost}}</td><td>{{item.denomination}}&nbsp;</td>
+						<td class="align-middle">{{item.pounds}}</td>
+						<td class="align-middle">{{getItemProperties(item)}}</td>
+						<td class="align-middle text-right" *ngIf="showQuantity">
+							{{item.count ? item.count : '&nbsp;'}}
+						</td>
+						<td *ngIf="!isShopping"> &nbsp; &nbsp; </td>
+						<td *ngIf="isShopping" class="align-middle" style="width:80px">
+							&nbsp;
+								<button (click)="cartAdd($event,item)" 
+											class="btn btn-xs"
+											style="position:relative; top:-3px">
+									<span class="fa fa-plus align-middle"></span>
+								</button>
+								<button (click)="cartRemove($event,item)" 
+											class="btn btn-xs"
+											style="position:relative; top:-3px">
+									<span class="fa fa-minus align-middle"></span>
+								</button>
+						</td>
+					</tr>
+					<tr (click)="toggleShowDescription(item)" 
+								*ngIf="(isItemTypeVisible(item.type) || !isGrouped)
+												&& item.notes && isOpenMap.get(item)">
+						<td colspan="2">&nbsp;</td>
+						<td [attr.colspan]="showQuantity ? 7 : 6" class="small">{{item.notes}}</td>
+					</tr>
+				</ng-container>
+			</table>
+</div>

@@ -1,0 +1,448 @@
+	<h2>Character Sheet</h2>
+	<div class="row" *ngIf="character$ | async as character; else loadingBig">
+		<!-- Character Creation Left Half -->
+		<div class="col-md-6">
+
+			<!-- CHARACTER DETAILS -->
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-9">
+									<h4 *ngIf="!character.name">Details</h4>
+									<h4 *ngIf="character.name">
+									<strong>
+										<span class="fancy">{{character.name}}</span>
+										<small class="text-muted" *ngIf="character.nickname">
+											"{{character.nickname}}"
+										</small>
+									</strong>
+									</h4>
+								</div>
+								<div class="col-3 text-right">
+									<span *ngIf="allowedRolls>character.xpRolls && !status.isLocked">
+										Locks: {{allowedRolls-character.xpRolls}}
+									</span>
+									<span class="btn-group-sm">
+										<button type="button" class="btn btn-default btn-sm" (click)="toggleDetailsStage(character)" 
+															[disabled]="character.stage == STAGE.Attributes 
+																			|| character.stage > STAGE.Equipment
+																			|| !isDetailsValid(character) 
+																			|| allowedRolls <= character.xpRolls
+																			|| status.isLocked">
+											<span class="fa "  
+											[ngClass]="{'fa-lock': character.stage!=STAGE.Details, 'fa-unlock': character.stage==STAGE.Details}"></span>
+										</button>
+									</span>
+								</div>
+							</div>
+							<div class="row" *ngIf="character.stage>STAGE.Details || isDetailsValid(character)">
+								<div class="col-12">
+									<strong>
+										<em>
+											<span>
+											{{getCharacterDescription(character)}}
+											</span>
+										</em>
+									</strong>
+								</div>
+							</div>
+						</div>
+						<div class="card-body" style="padding-top: 0px; padding-bottom: 0px">
+							<div class="row" *ngIf="character.stage == STAGE.Details">
+								<div class='col-12'>
+									<span class="input-group">
+										<span class="input-group-btn btn-group-sm">
+											<button type="button" class="btn btn-default btn-sm" (click)="generateName(character)" [disabled]="!character.raceName || character.stage!=STAGE.Details">
+												<span class="fa fa-magic"></span>
+											</button>
+										</span>
+										<input type="text" class="form-control form-control-sm" 
+														[(ngModel)]="character.name" placeholder="Name" 
+														name="name" [disabled]="character.stage!=STAGE.Details">
+										<input type="text" class="form-control form-control-sm" 
+														[(ngModel)]="character.nickname" placeholder="NickName" 
+														name = "nickname" [disabled]="character.stage!=STAGE.Details"
+														*ngIf="character.stage==STAGE.Details || character.nickname">
+									</span>
+								</div>
+							</div>
+
+							<!--Selectors: Gender/class/race/alignment-->
+							<div class="container">
+								<div class="row" *ngIf="character.stage<=STAGE.Details || !isDetailsValid(character)">
+									<div class="col-md-12">
+										<label>
+											Gender: 
+											<select-by-label 
+											[options]="['Male','Female','It\'s Complicated']" 
+											[disabled]="character.stage!=STAGE.Details" 
+											[(selected)]="character.gender" 
+											collapseWhenSelected="true">
+											</select-by-label>
+										</label>
+										<br *ngIf='!character.className' />
+										<label>
+											Class:
+											<select-by-label [options]="getValidClasses(character)" 
+											[disabled]="character.stage!=STAGE.Details" 
+											[(selected)]="character.className" 
+											displayProperty="name" 
+											returnObject="false" 
+											collapseWhenSelected="true">
+											</select-by-label>
+										</label>
+										<br *ngIf='!character.raceName' />
+										<label>
+											Race:
+											<select-by-label [options]="getValidRaces(character)" 
+												[disabled]="character.stage!=STAGE.Details" 
+												[(selected)]="character.raceName" 
+												displayProperty="name" 
+												returnObject="false" 
+												collapseWhenSelected="true">
+											</select-by-label>
+										</label>
+										<br *ngIf='!character.alignmentLaw || !character.alignmentGood' />
+										<label>
+											Align:
+												<select-by-label [options]="['Lawful','Neutral','Chaotic']" 
+												[disabled]="character.stage!=STAGE.Details" 
+												[(selected)]="character.alignmentLaw" 
+												collapseWhenSelected="true">
+												</select-by-label>
+											/
+												<select-by-label [options]="['Good','Neutral','Evil']" 
+												[disabled]="character.stage!=STAGE.Details" 
+												[(selected)]="character.alignmentGood" 
+												collapseWhenSelected="true">
+												</select-by-label>
+										</label>
+									</div>
+								</div>
+
+								<!-- HP and other uneditables -->
+								<div class="row" *ngIf="character.stage>STAGE.Details">
+									<div class="col-3 text-center">
+										<label>HP:
+											<span class="label"><strong>{{character.hitPoints}}</strong></span>
+										</label>
+									</div>
+									<div class="col-3 text-center">
+										<label>XP:
+											<span class="label"><strong>{{character.experiencePoints}}</strong></span>
+										</label>
+									</div>
+									<div class="col-3 text-center">
+										<label>Level:
+											<span class="label"><strong>{{character.level}}</strong></span>
+										</label>
+									</div>
+									<div class="col-3 text-center">
+										<label>Gold:
+											<span class="label"><strong>{{character.gold | number:'1.0-2' }}</strong></span>
+										</label>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- ATTRIBUTES -->
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-5">
+									<h5>Attributes</h5>
+								</div>
+								<!-- ATTRIBUTE TOOLBAR -->
+								<div class="col-7 text-right">
+									<span *ngIf="character.attributeRolls < allowedRolls">
+										&nbsp; Remaining Rolls: {{allowedRolls-character.attributeRolls}}
+									</span>
+									<span class="btn-group btn-group-sm">
+										<button type="button" class="btn btn-default" 
+											(click)="generateAttributes(character)" 
+											*ngIf="character.attributeRolls < allowedRolls"
+											[disabled]="character.stage!=STAGE.Attributes || !character ">
+											<span class="fa fa-magic"></span>
+										</button>
+										<button type="button" class="btn btn-default" (click)="toggleAttributeStage(character)" 
+											[disabled]="character.stage>STAGE.Details">
+											<span class="fa" [ngClass]="{'fa-lock': character.stage!=STAGE.Attributes, 'fa-unlock': character.stage==STAGE.Attributes}">
+											</span>
+										</button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="card-body" style="padding-top:0px; padding-bottom:0px;">
+							<div class="row">
+								<!--Attributes-->
+								<div class="col-md-12" *ngIf="character.stage==STAGE.Attributes">
+									<!--  VERTICAL NON-TABLE ATTRIBUTES Displayed when working on attributes-->
+									<div class="row"									
+												*ngFor="let attribute of character.attributes; let i=index">
+										<div class="col-md-3 text-right">{{attribute.key}}: </div>
+										<div class="col-md-2 text-justify">
+											<span class="badge" 
+												(dragstart)='dragStart($event)' [draggable]='character.stage==STAGE.Attributes'
+												(dragover)='allowDrop($event)' (drop)='drop($event)'
+												[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
+												(click)="selectIndex(i,character)" [id]="attribute.key">
+												<span *ngIf="attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)<10">&nbsp;
+												</span>
+												{{+attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)}}
+											</span>
+											<span class="notification-badge" *ngIf="getAttributeRaceMod(attribute.key, character.raceName, character.className)!=0">
+												{{getAttributeRaceMod(attribute.key, character.raceName, character.className) | modifier}}
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-12" *ngIf="character.stage!=STAGE.Attributes">
+									<!-- HORIZONTAL TABLE -- displayed when attributes locked 
+																						(too slow for drag and drop) -->
+									
+										<div class="row">
+											<div class="col-2 text-center" *ngFor="let attribute of character.attributes">
+												<strong>{{attribute.key}}</strong>
+											</div>
+										</div>
+										<div class="row" style="padding-bottom:5px;">
+											<div class="col-2 text-center" 
+														*ngFor="let attribute of character.attributes; let i=index">
+												<span class="badge" 
+													(dragstart)='dragStart($event)' [draggable]='character.stage==STAGE.Attributes'
+													(dragover)='allowDrop($event)' (drop)='drop($event)'
+													[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
+													(click)="selectIndex(i)" [id]="attribute.key">
+													<span *ngIf="attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)<10">&nbsp;
+													</span>
+													{{attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)}}
+												</span>
+												<span class="notification-badge" *ngIf="getAttributeRaceMod(attribute.key, character.raceName, character.className)!=0">
+													{{getAttributeRaceMod(attribute.key, character.raceName, character.className) | modifier}}
+												</span>
+											</div>
+										</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- EQUIPMENT -->
+			<div class='row' *ngIf="character.stage > STAGE.Details">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header">
+								<div class="row">
+									<div class="col-7">
+										<h5>Equipment</h5>
+									</div>
+									<div class="col-5 text-right">
+										
+											<span *ngIf='character.stage==STAGE.Equipment  && !status.isLocked'>
+												<button type="button" class="btn btn-sm" 
+																[ngClass]="{'btn-secondary': isCartShowing}"
+																(click)="showCart(cart,character)">
+													<span class="fa fa-shopping-cart"></span>
+												</button>
+
+												<button type="button" class="btn btn-sm" (click)="clearCart(cart)"
+																*ngIf='cart.size>0'>
+													<span class="fa fa-trash"></span>
+												</button>			
+												<button type="button" class="btn btn-sm" (click)="buyCart(cart,character)"
+																*ngIf='isCartBuyable(cart)'>
+													<span class="fa fa-handshake-o"></span>
+												</button>
+											</span>
+
+											&nbsp;
+											
+											<button type="button" class="btn btn-sm" (click)="toggleEquipmentStage(character)"
+															[disabled]='character.stage > STAGE.Spells
+																					|| character.stage < STAGE.Details
+																					|| status.isLocked'>
+												<span class="fa" 
+													[ngClass]="{'fa-unlock': character.stage == STAGE.Equipment && !status.isLocked,
+																			'fa-lock': character.stage != STAGE.Equipment  || status.isLocked}">
+												</span>
+											</button>
+
+			
+									</div>
+								</div>
+							</div>
+
+							<div class="card-body">
+							
+								<div class='col-md-12'>
+									<ngb-tabset>
+										<ngb-tab title="My Stuff">
+											<ng-template ngbTabContent>
+												<span *ngIf="!character || !character.equipment || !character.equipment.gear">
+													<br />
+													<h6>Sorry, you got nothing.</h6>
+												</span>
+												<equipment *ngIf="character && character.equipment && character.equipment.gear"
+														[gear]="character.equipment.gear"
+														[cart]="setFrom(character.equipment.gear)"
+														[isGrouped]="false" 
+														[showTotals]="true" [character]="character"
+														[showQuantity]="true" [isCart]="false">
+												</equipment>
+											</ng-template>
+										</ngb-tab>
+										<ngb-tab title="Shopping Cart" *ngIf="isCartShowing && !status.isLocked ">
+											<ng-template ngbTabContent>
+												<span *ngIf="!cart || cart.size<1">
+													<br />
+													<h6>Nothing in your cart.  Pick some stuff from the 'Equipment'
+													tab on the right</h6>
+												</span>
+												<equipment *ngIf="cart.size > 0" [gear]="arrayFrom(cart)" 
+														[cart]="cart" [isGrouped]="false" 
+														[showQuantity]="true" [isCart]="true"
+														[showTotals]="true" [character]="character">
+												</equipment>
+											</ng-template>
+										</ngb-tab>
+									</ngb-tabset>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+		</div>
+		
+		<!--Reference: Right Half -->
+		<div class="col-md-6">
+			<ngb-tabset type="pills">
+				<ngb-tab title="Races">
+					<ng-template ngbTabContent>
+						<select-by-label [options]="cs.getRaces(character)" [(selected)]="infoRace" displayProperty="name" returnObject="false">
+						</select-by-label>
+						<race-info [raceName]="infoRace"></race-info>
+					</ng-template>
+				</ngb-tab>
+				<ngb-tab title="Classes">
+					<ng-template ngbTabContent>
+						<select-by-label [options]="cs.getClasses(character)" [(selected)]="infoClass" displayProperty="name" returnObject="false">
+						</select-by-label>
+						<class-info [className]="infoClass"></class-info>
+					</ng-template>
+				</ngb-tab>
+				<ngb-tab title="Specs">
+					<ng-template ngbTabContent>
+						<ngb-tabset>
+							<ngb-tab title="Saving Throws">
+								<ng-template ngbTabContent>
+									<saving-throw-chart [attributes]="getAdjustedAttributes(character.attributes)" [raceName]="character.raceName" [className]="character.className" [level]="character.level" [attributesJson]="JSON.stringify(character.attributes)">
+									</saving-throw-chart>
+								</ng-template>
+							</ngb-tab>
+							<ngb-tab title="Ability Mods" class="small" *ngIf="character.attributes && character.attributes.length>0">
+								<ng-template ngbTabContent>
+									<table class="table table-specs">
+										<ng-container *ngFor="let ability of cs.getAttributeAbilityModList(getAdjustedAttributes(character))">
+											<tr *ngIf="ability.value && ability.value!=0 
+																	&& !isNaN(ability.value) 
+																	&& (!character.className || isIn(ability.classes,character.className))"
+													[ngClass]="{'text-warning':!character.className && ability.classes}">
+												<td>
+													{{ability.name | caseConvert: 'FC'}}
+												</td>
+												<td class="text-right"> 
+													<span *ngIf="ability.type=='MOD'">
+														{{ability.value < 0 ? ability.value : "+" + ability.value}}  
+														{{ability.isPercent ? "%" : ""}}
+													</span>
+													<span *ngIf="ability.type=='VALUE'">
+														{{ability.value + (ability.isPercent ? '%' : '')}}
+													</span>
+													<span *ngIf="ability.type=='DESCRIPTION'">
+														{{ability.description}}
+													</span>
+												</td>
+											</tr>
+										</ng-container>
+									</table>
+								</ng-template>
+							</ngb-tab>
+							<ngb-tab title="Tables" class="small" *ngIf="character.attributes && character.attributes.length>0">
+								<ng-template ngbTabContent>
+									<table class="table table-specs">
+										<ng-container *ngFor="let table of cs.getRelevantTables(character)">
+											<tr>
+												<td>
+													<h5>
+														{{table.name}} 
+														<small class="text-muted">
+															{{table.description}}
+														</small>
+													</h5>	
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<table class="table table-sm">
+														<tr>
+															<th *ngFor="let th of table.details.headers">
+																{{th}}
+															</th>
+														</tr>
+														<tr>
+															<td *ngFor="let td of table.details.values">
+																{{td}}
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</ng-container>
+									</table>
+								</ng-template>
+							</ngb-tab>
+						</ngb-tabset>
+					</ng-template>
+				</ngb-tab>
+				<ngb-tab title="Equipment">
+					<ng-template ngbTabContent>
+						<equipment [isShopping]="isCartShowing" [(cart)]="cart" 
+											[showQuantity]="isCartShowing" [showTotals]="false"></equipment>
+					</ng-template>
+				</ngb-tab>
+				
+			</ngb-tabset>
+		</div>
+	</div>
+
+<ng-template #genericModal let-c="close" let-d="dismiss">
+	<div class="modal-header">
+		<h4 class="modal-title">{{modal.title}}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="c('cancel')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+	</div>
+	<div class="modal-body">
+		{{modal.message}}
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" (click)="c('cancel')">{{modal.cancelButton}}</button>
+		<button type="button" class="btn btn-default" (click)="d('continue')">{{modal.continueButton}}</button>
+	</div>
+<ng-template>
+<ng-template #loadingBig>
+	<span class="fa fa-spin fa-spinner fa-5x"></span>
+</ng-template>

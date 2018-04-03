@@ -1,0 +1,28 @@
+<span class="btn btn-default" (click) = "newGame()">
+	<span class="fa fa-plus">
+	</span>
+</span>
+<ng-container *ngIf="gmds.games$ | async as games; else loading">
+	<ng-container *ngIf="games.length; else noGames">
+		<div class="row" *ngFor="let game of games">
+			<div class="col-md-12">
+				{{game.name}}
+				<span class="btn btn-default" (click)='deleteGame(game.key)'>
+					<span class="fa fa-minus"></span>
+				</span>
+				<span class="btn btn-default" (click)='editGame(game)'>
+					<span class="fa fa-pencil"></span>
+				</span>
+				<span class="btn btn-default" (click)='runGame(game)'>
+					<span class="ra ra-perspective-dice-one"></span>
+				</span>
+			</div>
+		</div>
+	</ng-container>
+</ng-container>
+<ng-template #loading>
+	<span class="fa fa-spin fa-spinner"></span>
+</ng-template>
+<ng-template #noGames>
+	<span >No Games yet...</span>
+</ng-template>
