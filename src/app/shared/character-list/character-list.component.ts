@@ -66,6 +66,12 @@ export class CharacterListComponent implements OnInit {
 		hp += character.hitPoints;
 		return hp;
 	}
+	
+	getProgressionIconName(character): string {
+		let icons = ['fa-hourglass-o', 'fa-hourglass-start', 'fa-hourglass-half',
+							'fa-hourglass-end', 'fa-hourglass'];
+		return icons[character.stage];
+	}
 
 	select(character: Character) {
 		if (!this.allowSelect) return;

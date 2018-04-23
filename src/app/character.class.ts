@@ -10,6 +10,8 @@ export enum STAGE { Attributes, Details, Equipment, Spells, Complete }
 
 export enum GEAR_STATUS { InUse, Stowed, Stored }
 
+export enum GENDER { 'Male', 'Female', "It's Complicated" }
+
 export class Character {
 	key: string;
 	name: string;
