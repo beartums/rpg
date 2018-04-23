@@ -24,7 +24,7 @@
 				(click)="select(character)" 
 				[ngClass]="selectedCharacterKey==character.key ? 'bg-success text-white' : ''">
 				<td>{{character.name}}</td>
-				<td> 
+				<td class="text-center" [attr.title]="character.gender"> 
 					<span class="fa"
 								[ngClass]="{'fa-mars': character.gender=='Male', 
 														'fa-venus': character.gender=='Female',
@@ -45,7 +45,9 @@
 				</td>
 				<td class=" text-right">{{ getAc(character, showArmoredAc) }}</td>
 				<td class=" text-center">{{ character.level }}</td>
-				<td><span class="fa" [ngClass]="getProgressionIconName(character)"></span></td>
+				<td [attr.title]="'Stage: ' + STAGE[character.stage]">
+					<span class="fa" [ngClass]="getProgressionIconName(character)"></span>
+				</td>
 				<td class="text-right">
 					<button *ngFor="let btn of buttons" class="btn btn-xs mr-2" [attr.title]="btn.title"
 									[ngClass]="btn.buttonClass" (click)='btn.callback($event,character)'>

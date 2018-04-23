@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, OnChanges, EventEmitter, SimpleChange
 
 import * as _ from 'lodash';
 
-import { Character } from '../../character.class';
+import { Character, STAGE } from '../../character.class';
 import { CharacterService } from '../../character.service';
 
 export class CharacterListButton {
@@ -38,6 +38,8 @@ export class CharacterListComponent implements OnInit {
 	selectedCharacterKey: string;
 	showArmoredAc: boolean = true;
 	
+	STAGE = STAGE;
+	
 	constructor(private cs: CharacterService) { }
 
   ngOnInit() {
@@ -68,8 +70,8 @@ export class CharacterListComponent implements OnInit {
 	}
 	
 	getProgressionIconName(character): string {
-		let icons = ['fa-hourglass-o', 'fa-hourglass-start', 'fa-hourglass-half',
-							'fa-hourglass-end', 'fa-hourglass'];
+		let icons = ['fa-thermometer-empty', 'fa-thermometer-quarter', 'fa-thermometer-half',
+							'fa-thermometer-three-quarters', 'fa-thermometer-full'];
 		return icons[character.stage];
 	}
 
