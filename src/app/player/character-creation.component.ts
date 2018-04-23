@@ -19,7 +19,6 @@ import * as _ from 'lodash';
 export class CharacterCreationComponent implements OnInit {
 
 	character: Character;
-	subscription;
 	characterKey: string;
 	userId: string;
 	gameKey: string;
@@ -48,20 +47,30 @@ export class CharacterCreationComponent implements OnInit {
 			this.userId = params.get('userId');
 			this.gameKey = params.get('gameKey');
 			if (this.characterKey == 'new') {
-				let character = new Character();
-				character.userId = this.userId;
-				this.characterKey = this.ds.saveCharacter(character);
-			} 
-			// Have to subscribe rather than using async because otherwise cannot
-			// access the character in the drag and drop functionality (async as
-			// works ina separate scope)
-			this.subscription = this.ds.fetchCharacter$(this.characterKey)
-						.subscribe(c=>this.character = c);
+				this.character = new Character();
+				this.character.userId = this.userId;
+				this.characterKey = null;
+			} else {
+				// Have to subscribe rather than using async because otherwise cannot
+				// access the character in the drag and drop functionality (async as
+				// works ina separate scope)
+				this.ds.fetchCharacter$(this.characterKey).take(1)
+							.subscribe(c=>this.character = c);
+			}
 		})
 	}
 	
 	ngOnDestroy() {
-		this.subscription.unsubscribe();
+		//this.subscription.unsubscribe();
+	}
+	
+	saveProgress(character) {
+		if (!this.characterKey) {
+			this.characterKey = this.ds.saveCharacter(character);
+			character.key = this.characterKey;
+		}	else {
+			this.ds.updateCharacter(character);
+		}
 	}
 	
 	adjustCharacterAttributes(oldRace: string, character:Character) {
@@ -83,7 +92,7 @@ export class CharacterCreationComponent implements OnInit {
 		// $|async as character NOT setting this.character.
 		this.character = character;
 		// save values
-		this.ds.updateCharacter(character);
+		this.saveProgress(character);
 	}
 
 	generateName(character: Character): void {
@@ -286,7 +295,7 @@ export class CharacterCreationComponent implements OnInit {
 		} else {
 			character.stage = STAGE.Details;			
 		}
-		this.ds.updateCharacter(character);
+		this.saveProgress(character);
 	}
 
 	toggleDetailsStage(character: Character) {
@@ -303,7 +312,7 @@ export class CharacterCreationComponent implements OnInit {
 			//character.equipment.gear = [];
 			character.stage = STAGE.Details;			
 		}
-		this.ds.updateCharacter(character);
+		this.saveProgress(character);
 	}
 	
 	toggleEquipmentStage(character: Character) {
@@ -315,7 +324,7 @@ export class CharacterCreationComponent implements OnInit {
 		} else {
 			character.stage = STAGE.Equipment;
 		}
-		this.ds.updateCharacter(character);
+		this.saveProgress(character);
 	}
 
 	generateBeginningBalances(character: Character) {
