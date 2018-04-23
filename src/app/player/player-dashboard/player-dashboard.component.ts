@@ -31,6 +31,8 @@ export class PlayerDashboardComponent implements OnInit {
 	idleCharacterButtons = [
 		{ title: 'Continue Character Creation', iconClass: 'fa fa-pencil', 
 			callback: this.continueCharacterCreation.bind(this) },
+		{ title: 'Show Character Sheet', iconClass: 'fa fa-id-badge', 
+			callback: this.playGame.bind(this) },
 		{ title: 'Delete Character', iconClass: 'fa fa-times text-danger', 
 			callback: this.deleteCharacter.bind(this) },
 	]
@@ -77,7 +79,7 @@ export class PlayerDashboardComponent implements OnInit {
 		this.ds.removeCharacter(character.key);
 	}
 	
-	playGame(character: Character) {
+	playGame(ev, character: Character) {
 		this.router.navigate(['/character-sheet',character.key]);
 	}
 	

@@ -30,7 +30,7 @@
 								</span>
 								<button class="btn btn-xs ml-2" title="Join Game (In progress)"
 												*ngIf="game.gameStatus==GAME_STATUS.Playing"
-											(click)="playGame(character)">
+											(click)="playGame($event, character)">
 									<span class="fa fa-gamepad"></span>
 								</button>
 								<button class="btn btn-xs ml-2" title="Leave this game"
