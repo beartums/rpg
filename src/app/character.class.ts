@@ -1,10 +1,14 @@
 //import { Roll } from '.\roll';
+import { Note } from './game.class';
+
 export enum AlignmentLaw {
 	"Lawful", "Neutral", "Good"
 }
 export enum GAME_STATUS { New, Playing, Paused, Cancelled, Completed }
  
 export enum STAGE { Attributes, Details, Equipment, Spells, Complete }
+
+export enum GEAR_STATUS { InUse, Stowed, Stored }
 
 export class Character {
 	key: string;
@@ -15,12 +19,13 @@ export class Character {
 	className: string;
 	raceName: string;
 	hitPoints: number = 0;
+	temporaryHitPoints?: number;
 	experiencePoints: number = 0;
 	alignmentLaw: string;
 	alignmentGood: string;
 	attributes: Attribute[];
-	equipment: Equipment = new Equipment();
-	treasure: Treasure[];
+	equipment;
+	//treasure: Treasure[];
 	gold: number = 0;
 	stage: STAGE = STAGE.Attributes;
 	attributeRolls?: number = 0;
@@ -28,6 +33,7 @@ export class Character {
 	currentGame: string;
 	userId: string;
 	retainedBy: string;
+	notes: Note[];
 }
 
 export class Attribute {
@@ -50,6 +56,9 @@ export class Gear {
 	type: string;
 	notes: string;
 	count?: number;
+	qty: string;
+	selectedCount: number;
+	status: GEAR_STATUS = GEAR_STATUS.InUse;
 }
 
 export class Weapon extends Gear {
@@ -59,14 +68,6 @@ export class Weapon extends Gear {
 export class Armor extends Gear {
 	armorClass: number;
 	armorClassMod?: number;
-}
-
-export class Treasure {
-	type: string;
-	name: string;
-	description: string;
-	quantity: number;
-	value: number; // GP value
 }
 
 export class SavingThrowDetail {

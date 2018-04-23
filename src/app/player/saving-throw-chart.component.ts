@@ -42,6 +42,7 @@ export class SavingThrowChartComponent implements OnChanges {
 		try {
 			this.savingThrowList = this.cs.getSavingThrowList(this.level, this.raceName, this.className, this.attributes);
 		} catch (e) {
+			console.log(e);
 			this.savingThrowList = [];
 		}
 	}

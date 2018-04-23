@@ -6,12 +6,13 @@ import { PlayerDashboardComponent }   from './player/player-dashboard/player-das
 import { ManageGamesComponent }     from './gm/manage-games/manage-games.component';
 import { RunGameComponent }     from './gm/run-game/run-game.component';
 import { EditGameComponent }     from './gm/edit-game/edit-game.component';
-import { MainMenuComponent }     from './main-menu/main-menu.component';
+import { CharacterSheetComponent }     from './player/character-sheet/character-sheet.component';
 
 import { AuthGmGuard, AuthUserGuard } from './auth.guard';
 
 const appRoutes: Routes = [
-	{ path: 'main-menu', component: MainMenuComponent },
+	{ path: 'character-sheet/:key', component: CharacterSheetComponent,
+		canActivate: [AuthUserGuard]},
 	{ path: 'player-dashboard', component: PlayerDashboardComponent,
 		canActivate: [AuthUserGuard]},
 	{ path: 'character-creation', component: CharacterCreationComponent,
@@ -24,7 +25,7 @@ const appRoutes: Routes = [
 		canActivate: [AuthGmGuard]},
 	{ path: 'edit-game/:key', component: EditGameComponent,
 		canActivate: [AuthGmGuard]},
-	{ path: '', redirectTo: '/main-menu', pathMatch: 'full' },
+	{ path: '', redirectTo: '/player-dashboard', pathMatch: 'full' },
 ]
 
 @NgModule({

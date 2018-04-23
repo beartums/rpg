@@ -1,0 +1,33 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12 text-smaller">
+			<table class="table table-sm table-specs">
+				<tr>
+					<th [attr.colspan]="table.headers.length+1">
+						<h5>
+							{{table.name}} 
+							<small class="text-muted">
+								{{table.description}}
+							</small>
+						</h5>	
+					</th>
+				</tr>
+				<tr [ngClass]="table.headerClasses">
+					<th>
+						{{table.rowLabelType}}
+					<th *ngFor="let th of table.headers">
+						{{th}}
+					</th>
+				</tr>
+				<tr *ngFor="let row of table.valueRows" [ngClass]="row.rowClasses">
+					<td>
+						{{row.rowLabel}}
+					</td>
+					<td *ngFor="let value of row.values; let i = index" [ngClass]="row.columnClasses[i]">
+						{{value}}
+					</td>					
+				</tr>
+			</table>
+		</div>			
+	</div>			
+</div>			

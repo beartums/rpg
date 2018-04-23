@@ -1,0 +1,150 @@
+<div class="container-fluid">
+	<div class="row" id="SearchAndSummary">
+		<div class="col-12 text-center align-middle">
+			<div class="badge badge-secondary d-flex">
+				<span class="my-auto mr-auto" title="Selected Gear Value">
+					<span class="ra ra-gold-bar text-warning my-auto"></span>
+					{{selectedGearSummary.value | number:'0.0-2'}}
+					<span *ngIf="targetGold" title="Gold available for purchases">
+						({{targetGold | number:'0.0-2'}})
+					</span>
+				</span>
+
+				<span class="my-auto mx-auto" title="Selected Gear Weight">
+					<span class="ra ra-kettlebell text-danger my-auto"></span>
+					{{selectedGearSummary.weight}}
+					<span *ngIf="targetEquipmentSummary.weight" title="Character's current encumbrance (lbs)">
+						({{targetEquipmentSummary.weight | number:'0.0-2'}})
+					</span>
+				</span>
+
+				<span class="mx-auto my-auto">
+					<button class="btn btn-light btn-xs" 
+								[disabled]="(targetGold && targetGold < selectedGearSummary.value) 
+														|| selectedGearSummary.itemCount<1"
+								(click)="completeTransaction(mode,false)"
+								title="Transfer the gear and the gold">
+						<span class="fa fa-handshake-o"></span>
+					</button>
+					<button class="btn btn-light btn-xs" 
+								[disabled]="selectedGearSummary.itemCount < 1"
+								(click)="completeTransaction(mode,true)"
+								title="Gift the gear; no gold changes hands">
+						<span class="fa fa-gift"></span>
+					</button>
+					<button class="btn btn-light btn-xs" 
+								[disabled]="selectedGearSummary.itemCount < 1"
+								(click)="clearSelected()"
+								title="Clear all selections">
+						<span class="fa fa-trash"></span>
+					</button>
+				</span>
+
+				<div class="input-group input-group-xs col-6">
+					<input class="form-control form-control-xs" (keyup)="handleKeyup($event)"
+									type="text" [(ngModel)]="searchString">
+					<div class="input-group-append">
+						<div ngbDropdown >
+							<button class="btn btn-light btn-xs h-100 w-100" 
+											type="button" ngbDropdownToggle style="border-color: lightGrey">
+								{{selectedCategory}}
+							</button>
+							<div ngbDropdownMenu>
+								<span *ngFor="let category of gearCategories" href 
+											class="dropdown-item " (click)="selectCategory(category)">
+									{{category}}
+								</span>
+							</div>
+						</div>
+						<button class="btn btn-light btn-xs" (click)="clearSearch()" style="border-color: lightgrey">
+							<span class="fa fa-times text-danger"></span>
+						</button>
+						<button class="btn btn-light btn-xs" 
+												style="border-color: lightgrey" disabled>
+							<span class="fa fa-search"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" id="tableRow">
+		<div class="col-12">
+			<ng-container >
+				<table class="table table-sm">
+					<tr>
+						<th colspan="2">Item</th>
+						<th class="text-right" title="Quantity on hand" *ngIf="sourceEquipment">
+							Qty
+						</th>
+						<th class="text-right" title="Quantity selected" *ngIf="allowSelections">
+							Sel
+						</th>
+						<th colspan="2" class="text-center">Cost</th>
+						<th class="text-right">Lbs</th>
+						<th>Props</th>
+						<th></th>
+					</tr>
+					<ng-container *ngFor="let item of items">
+						<tr	[ngClass]="isItemSelected(item) ? 'bg-success text-white' : ''">
+							<td>
+								<span [ngClass]= "{
+													'ra-shield': item.type=='Armor',
+													'ra-sword': item.type=='Weapon',
+													'ra-beer': item.type=='Provisions',
+													'fa-motorcycle': item.type=='Transport',
+													'fa': item.type=='Transport',
+													'ra': item.type!='Transport',
+													'ra-torch': item.type=='Gear' }"
+											[attr.title]="item.type">
+								</span>
+							</td>
+							<td>
+								{{item.name}} 
+								{{getQuantity(item)}}
+								<span *ngIf="item.notes" title="{{item.notes}}" 
+												[ngClass]="isItemSelected(item) ? 'text-white' : 'text-info'"
+												class="fa fa-info-circle" (click)="toggleInfo($event, item)">
+								</span>
+							</td>
+							<td class="text-right" *ngIf="sourceEquipment">
+								{{item.count}}
+							</td>
+							<td class="text-right" *ngIf="allowSelections">
+								{{selectedGearQuantity.get(item)?selectedGearQuantity.get(item):''}}
+							</td>
+							<td class="text-right">{{item.cost}}</td>
+							<td class="text-left">{{item.denomination}}</td>
+							<td class="text-right align-middle">{{item.pounds}}</td>
+							<td class="align-middle">{{getItemProperties(item)}}</td>
+							<td class="text-right align-middle h-100">
+									<button class="table-btn btn-xs" 
+											[ngClass]="canUnselectItem(item) ? 'visible' : 'invisible'"
+											(click)="changeSelectedQuantity(item,-1)">
+										<span class="fa fa-minus">
+										</span>
+									</button>
+									<button class='table-btn btn-xs' 
+												[ngClass]="canSelectItem(item) ? 'visible' : 'invisible'"
+												(click)="changeSelectedQuantity(item,1)">
+										<span class="fa fa-plus">
+										</span>
+									</button>
+
+							</td>
+						</tr>
+						<tr *ngIf="isShowingInfo(item)" class="bt-0 pt-0 mt-0"
+								(click)="toggleItemSelected($event, item)"
+								[ngClass]="isItemSelected(item) ? 'bg-success text-white' : ''">
+							<td class="bt-0 pt-0 mt-0"></td>
+							<td class="text-smaller font-italic bt-0 pt-0 mt-0"
+									[attr.colspan]="8 - (allowSelections ? 1 : 0) - (sourceEquipment ? 0 : 1)">
+								{{item.notes}}
+							</td>
+						</tr>
+					</ng-container>
+				</table>
+			</ng-container>
+		</div>
+	</div>
+</div>

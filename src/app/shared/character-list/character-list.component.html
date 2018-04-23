@@ -1,0 +1,72 @@
+<table class="table table-sm">
+		<tr>
+			<th>Character</th>
+			<th>Race</th>
+			<th>Class</th>
+			<th>Alignment</th>
+			<th class=" text-right"><span class="ra ra-muscle-up" title="Strength"></span></th>
+			<th class=" text-right"><span class="ra ra-feather-wing" title="Dexterity"></span></th>
+			<th class=" text-right"><span class="ra ra-raven" title="Intelligence"></span></th>
+			<th class=" text-right"><span class="ra ra-rune-stone" title="Wisdom"></span></th>
+			<th class=" text-right"><span class="ra ra-health" title="Constitution"></span></th>
+			<th class=" text-right"><span class="ra ra-aura" title="Charisma"></span></th>
+			<th class=" text-right"><span class="fa fa-heartbeat" title="Hit Points"></span> </th>
+			<th class=" text-right" (click)="toggleAcType()">
+				<span class="ra ra-player" title="Unarmored AC" *ngIf="!showArmoredAc"></span> 
+				<span class="ra ra-shield" title="Fully Armored AC" *ngIf="showArmoredAc"></span> 
+			</th>
+			<th class=" text-right"><span class="ra ra-player-lift" title="Level"></span> </th>
+			<th><span class=""></span> </th>
+			<th></th>
+		</tr>
+			<tr *ngFor="let character of characters"
+				(click)="select(character)" 
+				[ngClass]="selectedCharacterKey==character.key ? 'bg-success text-white' : ''">
+				<td>{{character.name}}</td>
+				<td>{{character.raceName}}</td>
+				<td>{{character.className}}</td>
+				<td>{{character.alignmentLaw}}/{{character.alignmentGood}}</td>
+				<td class=" text-right">{{ getAttributeValue('STR',character.attributes) }}</td> 
+				<td class=" text-right">{{ getAttributeValue('DEX',character.attributes) }}</td> 
+				<td class=" text-right">{{ getAttributeValue('INT',character.attributes) }}</td> 
+				<td class=" text-right">{{ getAttributeValue('WIS',character.attributes) }}</td> 
+				<td class=" text-right">{{ getAttributeValue('CON',character.attributes) }}</td>
+				<td class=" text-right">{{ getAttributeValue('CHA',character.attributes) }}</td>
+				<td class=" text-right">
+					{{ getHP(character) }}
+				</td>
+				<td class=" text-right">{{ getAc(character, showArmoredAc) }}</td>
+				<td class=" text-right">{{ character.level }}</td>
+				<td><span class="fa" [ngClass]="'fa-battery-' + (character.stage || 0)"></span></td>
+				<td class="text-right">
+					<button *ngFor="let btn of buttons" class="btn btn-xs mr-2" [attr.title]="btn.title"
+									[ngClass]="btn.buttonClass" (click)='btn.callback($event,character)'>
+						<span [ngClass]="btn.iconClass"></span>
+					</button>
+				</td>					
+			</tr>
+
+		<!--tr *ngIf="addingExistingCharacter">
+			<td> 
+				<div class="input-group input-group-sm" *ngIf="addingExistingCharacter">
+					<div class="input-group input-group-sm" 
+								*ngIf="existingCharacters$ | async as existingCharacters; else loading">
+						<select class="form-control form-control-sm" [(ngModel)]="existingCharacterId"
+							(change)="selectExistingCharacter($event)">
+							<option *ngFor="let char of existingCharacters" 
+											[ngValue]="char.key">
+								{{char.name}}
+							</option>
+						</select>
+						<div class="input-group-append" (click)="addingExistingCharacter = false">
+							<button class="btn btn-default btn-sm">
+								<span class="fa  fa-times"></span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</td>
+			<td colspan="12"></td>
+		</tr-->
+	</table>
+

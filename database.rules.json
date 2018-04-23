@@ -1,21 +1,9 @@
 {
   "rules": {
-			".read": "auth != null",
-			".write": "auth != null",
-		},
-		"Games": {
-			".read": "auth != null",
-			".write": "auth != null",
-		},
-		"Options": {
-			".read": "auth != null",
-			".write": "auth != null",
-		},
-		"Users": {
-			"$user_id": {
-				".write": "$user_id === auth.id || auth.token.email === 'eric@griffithnet.com' || auth.token.email === 'eric.griffith@oneacrefund.org'",
-				".read": "$user_id === auth.id || auth.id === 'fcUUaYt7Weao6ebSE8cWNImHtaN2' || auth.id === 'xb0gzTfBzjgQ7Fc8e2O5L2XtciH3'",
-			}
+    ".read": "auth != null",
+    ".write": "auth != null",
+		"Characters": {
+			".indexOn": ["currentGame","userId"]
 		}
- }
-
+  }
+}

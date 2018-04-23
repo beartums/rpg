@@ -16,6 +16,7 @@ export class SelectByLabelComponent implements OnChanges {
 	@Output() selectedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 	@Input() disabled: boolean;
 	@Input() direction: string = 'h';
+	@Output() onSelected = new EventEmitter<any>()
 
 	@Input() returnObject: string = 'true';
 	@Input() collapseWhenSelected: string = 'false';
@@ -85,6 +86,7 @@ export class SelectByLabelComponent implements OnChanges {
 
 	toggleSelection(obj: any, isDisabled: boolean): void {
 		if (this.isDisabled(obj)) return;
+		let oldSelection = this.selected
 		if (this._returnObject) {
 			this.selected = this.selected === obj ? null : obj;
 		} else {
@@ -92,5 +94,6 @@ export class SelectByLabelComponent implements OnChanges {
 			this.selected = this.selected === val ? null : val;
 		}
 		this.selectedChange.emit(this.selected);
+		this.onSelected.emit(oldSelection);
 	}
 }

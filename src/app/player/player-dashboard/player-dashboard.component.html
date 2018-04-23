@@ -1,89 +1,58 @@
 <div class="container">
 	<div class="row">
-		<div class="col-12">
-			<h3>Characters currently engaged...</h3>
-			<table class="table table-sm" *ngIf="characters$ | async as characters; else loading">
-				<tr>
-					<th>Name</th>
-					<th>Race</th>
-					<th>Class</th>
-					<th>Game</th>
-					<th>Started</th>
-					<th>Status</th>
-					<th></th>
-					<th></th>
-				</tr>
-				<tr *ngFor="let character of filterEngagedCharacters(characters)" class="align-middle">
-					<td>{{character.name}}</td>
-					<td>{{character.raceName}}</td>
-					<td>{{character.className}}</td>
-					<ng-container *ngIf="games[character.currentGame] as game; else fourColumnTemplate">
-						<td>{{game.name}}</td>
-						<td>{{game.startDate | date }}</td>
-						<td>{{GAME_STATUS[game.gameStatus]}}</td>
-						<td class="text-right">
-							<span *ngIf="game.gameStatus==GAME_STATUS.New && character.stage < STAGE.Complete">
-								<button class="btn btn-xs" (click)="continueCharacterCreation(character)">
-									<span class="fa fa-pencil"></span>
+		<ng-container *ngIf="characters$ | async as characters; else loading">
+			<div class="col-12" *ngIf="characters.length>0">
+				<h3>Characters currently engaged...</h3>
+				<table class="table table-sm">
+					<tr>
+						<th>Name</th>
+						<th>Race</th>
+						<th>Class</th>
+						<th>Game</th>
+						<th>Started</th>
+						<th>Status</th>
+						<th></th>
+						<th></th>
+					</tr>
+					<tr *ngFor="let character of filterEngagedCharacters(characters)" class="align-middle">
+						<td>{{character.name}}</td>
+						<td>{{character.raceName}}</td>
+						<td>{{character.className}}</td>
+						<ng-container *ngIf="games[character.currentGame] as game; else fourColumnTemplate">
+							<td>{{game.name}}</td>
+							<td>{{game.startDate | date }}</td>
+							<td>{{GAME_STATUS[game.gameStatus]}}</td>
+							<td class="text-right">
+								<span *ngIf="game.gameStatus==GAME_STATUS.New && character.stage < STAGE.Complete">
+									<button class="btn btn-xs" (click)="continueCharacterCreation($event, character)">
+										<span class="fa fa-pencil"></span>
+									</button>
+								</span>
+								<button class="btn btn-xs ml-2" title="Join Game (In progress)"
+												*ngIf="game.gameStatus==GAME_STATUS.Playing"
+											(click)="playGame(character)">
+									<span class="fa fa-gamepad"></span>
 								</button>
-							</span>
-							<button class="btn btn-xs ml-2" *ngIf="game.gameStatus==GAME_STATUS.Playing"
-										(click)="playGame(character)">
-								<span class="fa fa-gamepad"></span>
-							</button>
-							<button class="btn btn-xs ml-2" (click)="leaveGame(character)">
-								<span class="fa fa-sign-out"></span>
-							</button>
-						</td>
-					</ng-container>
-				</tr>
-			</table>
-		</div>
+								<button class="btn btn-xs ml-2" title="Leave this game"
+												(click)="leaveGame(character)">
+									<span class="fa fa-sign-out"></span>
+								</button>
+							</td>
+						</ng-container>
+					</tr>
+				</table>
+			</div>
+		</ng-container>
 	</div>
 	<div class="row">
-		<div class="col-12">
-			<h3>Idle Characters...</h3>
-			<table class="table table-sm" *ngIf="characters$ | async as characters; else loading">
-				<tr>
-					<th>Character</th>
-					<th>Race</th>
-					<th>Class</th>
-					<th>Alignment</th>
-					<th><span class="ra ra-muscle-up"></span></th>
-					<th><span class="ra ra-feather-wing"></span></th>
-					<th><span class="ra ra-raven"></span></th>
-					<th><span class="ra ra-rune-stone"></span></th>
-					<th><span class="ra ra-kettlebell"></span></th>
-					<th><span class="ra ra-aura"></span></th>
-					<th><span class="fa fa-heartbeat"></span> </th>
-					<th><span class="ra ra-player-lift"></span> </th>
-					<th><span class=""></span> </th>
-					<th></th>
-					<th></th>
-				</tr>
-				<tr *ngFor="let character of filterIdleCharacters(characters)" 
-						class="align-middle h-100">
-					<td>{{character.name}}</td>
-					<td>{{character.raceName}}</td>
-					<td>{{character.className}}</td>
-					<td>{{character.alignmentLaw}}/{{character.alignmentGood}}</td>
-					<td>{{ getAttributeValue('STR',character.attributes) }}</td> 
-					<td>{{ getAttributeValue('DEX',character.attributes) }}</td> 
-					<td>{{ getAttributeValue('INT',character.attributes) }}</td> 
-					<td>{{ getAttributeValue('WIS',character.attributes) }}</td> 
-					<td>{{ getAttributeValue('CON',character.attributes) }}</td>
-					<td>{{ getAttributeValue('CHA',character.attributes) }}</td>
-					<td>{{ character.hitPoints }}</td>
-					<td>{{ character.level }}</td>
-					<td><span class="fa" [ngClass]="'fa-battery-' + (character.stage || 0)"></span></td>
-					<td class="text-right mt-0" *ngIf="character.stage != STAGE.Complete">
-						<button class="btn btn-xs ml-2 mt-0" (click)="continueCharacterCreation(character)">
-							<span class="fa fa-pencil"></span>
-						</button>
-					</td>
-				</tr>
-			</table>
-		</div>
+		<ng-container *ngIf="characters$ | async as characters; else loading">
+			<div class="col-12" *ngIf="characters.length>0">
+				<h3>Idle Characters...</h3>
+				<character-list [characters]="filterIdleCharacters(characters)" [allowSelect]="false"
+					[buttons]="idleCharacterButtons">
+				</character-list>
+			</div>
+		</ng-container>
 	</div>
 	<div class="row">
 		<div class="col-12">
@@ -98,7 +67,8 @@
 	<td></td>
 	<td></td>
 	<td class="text-right">
-		<button class="btn btn-xs ml-2" (click)="leaveGame(character)">
+		<button class="btn btn-xs ml-2" title="Leave this game"
+						(click)="leaveGame(character)">
 			<span class="fa fa-sign-out"></span>
 		</button>
 	</td>

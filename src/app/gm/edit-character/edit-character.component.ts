@@ -20,7 +20,14 @@ export class EditCharacterComponent implements OnInit {
 
 	@Output() characterChange: EventEmitter<Character> = new EventEmitter<Character>()
 	@Input() character: Character;
+	
+	// Hack to allow child component to unhighlight the selected line when needed
+	@Output() characterKeyChange: EventEmitter<string> = new EventEmitter<string>()
+	@Input() characterKey: string;
+	
+	
 	_character: Character;
+	_prevCharacter: Character;
 	
 	players$;
 	alignments;
@@ -36,8 +43,21 @@ export class EditCharacterComponent implements OnInit {
 		for (let prop in changes) {
 			if (prop == 'character') {
 				// TODO: warn and save, if needed;
+				
+				// _character is the character being edited, cloned from the 
+				// 'character' passed as an input property
+				// _prevCharacter is used to see if the 'character' from the parent
+				// component has changed externally in the ngDoCheck function
 				this._character = _.cloneDeep(this.character);
+				this._prevCharacter = _.cloneDeep(this.character);
 			}
+		}
+	}
+	
+	ngDoCheck() {
+		if (!_.isEqual(this.character,this._prevCharacter)) {
+			this._character = _.cloneDeep(this.character);
+			this._prevCharacter = _.cloneDeep(this.character);
 		}
 	}
 	
@@ -66,6 +86,7 @@ export class EditCharacterComponent implements OnInit {
 	
 	cancel() {
 		this.characterChange.emit(null);
+		this.characterKeyChange.emit(null);
 	}
 	
 	save() {
@@ -77,7 +98,8 @@ export class EditCharacterComponent implements OnInit {
 			return a;
 		})
 		this.gmds.updateCharacter(this.character.key,this._character)
-		this.characterChange.emit(null);
+		//this.characterChange.emit(null);
+		//this.characterKeyChange.emit(null);
 	}	
 
 }

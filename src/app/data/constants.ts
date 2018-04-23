@@ -12,6 +12,10 @@ export const ALIGNMENTS = {
 	law: ['Lawful','Neutral','Chaotic']
 }
 
+export const DEFAULTS = {
+	baseArmorClass: 9,
+}
+
 // this is the adjustment to xp earned based on the average of the prime
 // requisite attributes  Generaly the average could not be below 3, or above 18.  -.2
 // is therefore, unlikely to happen
@@ -58,7 +62,7 @@ export const LANGUAGE_PROFICIENCY = {
 export const ATTRIBUTE_ABILITY_MODIFIERS = {
 	Std: [-4,-4,-4,-3,-2,-2,-1,-1,-1,0,0,0,0,1,1,1,2,2,3,4],
 	Poison: [-3,-3,-3,-2,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-	AC: [4,4,4,3,2,1,1,1,0,0,0,0,-1,-1,-2,-2,-2,-3,-4],
+	AC: [4,4,4,3,2,2,1,1,1,0,0,0,0,-1,-1,-1,-2,-2,-3,-4],
 	Thief: [null,null,null,-.6,-.3,-.3,-.15,-.15,-.15,0,0,0,0,0,0,0,.05,.05,.1,.15],
 	Reaction: [3,3,3,2,1,1,1,1,1,0,0,0,0,-1,-1,-1,-1,-1,-2],
 	Retainers: [0,0,0,1,2,2,3,3,3,4,4,4,4,5,5,5,6,6,7],

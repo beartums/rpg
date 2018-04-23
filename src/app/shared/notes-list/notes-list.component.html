@@ -1,0 +1,84 @@
+<div class="container-fluid">
+			<table class="table table-sm h-100">
+				<tr class="align-text-top">
+					<th width="10%">Date</th>
+					<th>Note</th>
+					<ng-container *ngIf="isGm">
+						<th title="Visible to players?" width="5%" >
+							<span class="fa fa-eye"></span>
+							<!--span *ng-if="isGm" class="fa-stack">
+								<span class="fa fa-eye fa-stack-1x"></span>
+								<span class="ra ra-crown ra-stack-1x"></span>
+							</span-->
+						</th>
+						<th class="text-right" width="10%">
+							<div class="btn-group btn-group-xs">
+								<button class="btn btn-xs" (click)="addNote()">
+									<span class="fa fa-plus"></span>
+								</button>
+							</div>
+						</th>
+					</ng-container>
+					<ng-container *ngIf="!isGm">
+						<th></th>
+						<th></th>
+					</ng-container>
+				</tr>
+				<tr *ngIf="newNote" class="align-text-top text-center">
+					<td>
+						<input type="date" class="form-control form-control-sm" 
+									[ngModel]="newNote.date | date:'yyyy-MM-dd'"
+									(ngModelChange)="newNote.date = $event">
+					</td>
+					<td><textarea [(ngModel)]="newNote.text" class="form-control form-control-sm w-100"></textarea></td>
+					<td>
+						<span *ngIf="isGm" (click)="toggleIsVisible(newNote)">
+								<span>
+									<input type="checkbox" class="checkbox-inline" [checked]="newNote.isVisibleByPlayer" />
+								</span>
+						</span>
+					</td>
+					<td class="text-right">
+						<span *ngIf="isGm" class="fa fa-check text-success" (click)="saveNote(newNote)"></span>
+						&nbsp;
+						<span *ngIf="isGm" class="fa fa-times text-danger" (click)="cancelAddNote()"></span>
+					</td>
+				</tr>
+				<ng-container *ngFor="let note of notes">
+					<tr *ngIf="isGm || note.isVisibleByPlayer"  class="align-top align-items-top"
+							(click)="toggleSelected(note)">
+						<td>
+							<span *ngIf="selectedNote!==note" class="text-smaller">{{note.date | date:'M/d' }}</span>
+							<span *ngIf="selectedNote===note">
+								<input type="date" class="form-control form-control-sm" 
+									[ngModel]="_note.date | date:'yyyy-MM-dd'"
+									(ngModelChange)="_note.date = $event">
+							</span>
+						</td>
+						<td>
+						 <span *ngIf="selectedNote!==note" class=" text-smaller">{{note.text}}</span>
+						 <span *ngIf="selectedNote===note">
+							<textarea [(ngModel)]="_note.text" class="form-control form-control-sm w-100" ></textarea>
+						 </span>
+						</td>
+						<td>
+								<span *ngIf="selectedNote!==note">
+									<input type="checkbox" disabled class="checkbox-inline" [checked]="note.isVisibleByPlayer" />
+								</span>
+								<span *ngIf="selectedNote===note" (click)="toggleIsVisible(_note)">
+									<input type="checkbox" class="checkbox-inline" [checked]="_note.isVisibleByPlayer" />
+								</span>
+
+						</td>
+						<td class="text-right">
+							<span *ngIf="isGm && selectedNote!==note" class="fa fa-times text-muted" (click)="deleteNote($event,note)"></span>
+							<span *ngIf="selectedNote===note" width="10%">
+								<span *ngIf="isGm" class="fa fa-check text-success" (click)="saveChanges($event)"></span>
+								&nbsp;
+								<span *ngIf="isGm" class="fa fa-times text-danger" (click)="cancelChanges($event)"></span>
+							</span>
+						</td>
+					</tr>
+				</ng-container>
+			</table>
+</div>

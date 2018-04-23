@@ -2,13 +2,13 @@
 	<div class="row h-100 align-items-center">
 		<div class="col-9">
 			<button  class="btn btn-sm" 
-					*ngIf="authService.isGm" routerLink="/manage-games">
+					*ngIf="authService.isGm" routerLink="/manage-games" title="GM Dashboard">
 				<span class='ra ra-crown-of-thorns'></span>
 
 			</button>
 			<button  class="btn btn-sm" routerLink="/player-dashboard" 
-					*ngIf="authService.isLoggedIn">
-				<span class='ra ra-player'></span>
+					*ngIf="authService.isLoggedIn" title="Player Dashboard">
+				<span class='fa fa-tachometer'></span>
 
 			</button>
 		</div>
@@ -17,7 +17,7 @@
 				<strong>{{authService.userDisplayName || authService.userEmail}}</strong>
 			</div>
 			<div class="col-1 text-right h-100">
-				<span class="btn btn-sm" (click)="logout()" tooltip="logout">
+				<span class="btn btn-sm" (click)="logout()" title="logout">
 					<span class="fa fa-sign-out"></span>
 				</span>
 			</div>

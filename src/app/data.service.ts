@@ -6,12 +6,12 @@ import * as _ from 'lodash';
 import { ATTRIBUTES, RACES, CLASSES, XP_ADJUSTMENTS, SPELLS, CLASS_GROUP_XREF, 
 				SAVING_THROW_NAMES, SAVING_THROWS, ATTRIBUTE_ABILITY_MODIFIERS_XREF, 
 				ATTRIBUTE_ABILITY_MODIFIERS, LANGUAGE_PROFICIENCY, ATTACK_TABLES,
-				CURRENCY_VALUES, ALIGNMENTS } from  './data/constants';
+				CURRENCY_VALUES, ALIGNMENTS, DEFAULTS } from  './data/constants';
 import { NAMES } from './data/mock-names';
 import { EQUIPMENT } from './data/equipment';
 
 import { Attribute, Character, STAGE, Gear } from './character.class';
-import { Game } from './Game.class';
+import { Game } from './game.class';
 
 import { AuthService } from './auth.service';
 import { AngularFireDatabase } from 'angularfire2/database';
@@ -34,6 +34,7 @@ export class DataService {
 	LanguageProficiency = LANGUAGE_PROFICIENCY;
 	Equipment = EQUIPMENT;
 	CurrencyValues = CURRENCY_VALUES
+	Defaults = DEFAULTS
 	
 	user: any;
 	urls: any = {};
@@ -148,6 +149,10 @@ export class DataService {
 		return value;
 	}
 	
+	getBaseArmorClass(): number {
+		return this.Defaults.baseArmorClass;
+	}
+	
 	fetchCharacter$(key: string): Observable<Character> {
 		let character = this.db.object('Characters/' + key);
 		return character.snapshotChanges().map(changes => {
@@ -205,6 +210,10 @@ export class DataService {
 			if (this.ClassGroupXref[i][0] == className) return this.ClassGroupXref[i][1];
 		}
 		return null;
+	}
+	
+	getCurrency(type: string): any {
+		return this.getDenomination(type);
 	}
 	
 	getDenomination(denom: string): any {
@@ -325,6 +334,8 @@ export class DataService {
 		let table = cClass[tableAttributeName];
 		if (!table) return null;
 		
+		let level = character.level>0 ? character.level : 1;
+		
 		let values;
 		if (tableAttributeName == 'spellProgression') {
 			for (let prop in table) {
@@ -335,7 +346,7 @@ export class DataService {
 				}
 			}
 		} else {
-			return table[character.level];
+			return table[level];
 		}
 		if (!values) return null;
 		
@@ -370,6 +381,10 @@ export class DataService {
 		let updCharacter = _.cloneDeep(character);
 		delete updCharacter.key;
 		this.charactersRef.update(character.key,updCharacter);
+	}
+	
+	removeCharacter(key: string) {
+		this.charactersRef.remove(key);
 	}
 	
 	// sort an array of objects by any first-level properties in those objects

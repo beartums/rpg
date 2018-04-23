@@ -1,5 +1,4 @@
 <div class="container">
-<hr />
 	<div class="row">
 		<div class="col-2">
 			<label for="name">Name</label>
@@ -46,7 +45,18 @@
 					</div>
 				</div>
 		</div>
-		<div class="col-2"></div>
+		<div class="col-2">
+				<div class="row">
+					<div class="col-6">
+						<label>Gold</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.gold">
+					</div>
+					<div class="col-6">
+						<label>TmpHP</label>
+						<input type="text" class="form-control form-control-sm" [(ngModel)]="_character.temporaryHitPoints">
+					</div>
+				</div>
+		</div>
 		<div class="col-4">
 				<div class="row">
 					<div class="col-3">
@@ -68,7 +78,7 @@
 				</div>
 		</div>
 	</div>
-	<div class="row">
+	<div class="row h-100 align-items-end">
 		<div class="col-4">
 			<label for="player">Played By</label>
 			<select class="form-control form-control-sm" id="player" [(ngModel)]="_character.userId">
@@ -77,7 +87,7 @@
 				</option>
 			</select>
 		</div>
-		<div class="col-2">
+		<div class="col-3">
 			<div class="row">
 				<div class="col-6">
 					<label for="atRolls">Att. Rolls</label>
@@ -89,12 +99,11 @@
 				</div>
 			</div>
 		</div>
+		<div class="col-5 text-right">
+			<button type="button" class="btn btn-default" [disabled]="this.isChanged()" (click)="reset()">Reset</button>
+			&nbsp;
+			<button type="button" class="btn btn-default" (click)="cancel()">Cancel</button>
+			&nbsp;
+			<button type="button" class="btn btn-success" [disabled]="this.isChanged()" (click)="save()">Save</button>
+		</div>		
 	</div>
-	<br />
-	<div class="row">
-		<button type="button" class="btn btn-default" [disabled]="this.isChanged()" (click)="reset()">Reset</button>
-		&nbsp;
-		<button type="button" class="btn btn-default" (click)="cancel()">Cancel</button>
-		&nbsp;
-		<button type="button" class="btn btn-success" [disabled]="this.isChanged()" (click)="save()">save</button>
-</div>

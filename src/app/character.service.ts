@@ -1,7 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 
+import { Table, TableValueRow } from './table.class';
 import { Roll } from './shared/roll';
-import { Character, Attribute, SavingThrowDetail } from './character.class';
+import { Character, Attribute, SavingThrowDetail, Armor, Gear,
+					GEAR_STATUS} from './character.class';
 import { DataService } from './data.service';
 import { CaseConvertPipe } from './shared/case-convert.pipe';
 
@@ -40,6 +42,7 @@ export class CharacterService {
 		}
 		return attributes;
 	}
+	
 	generateEmptyAttributesArray(): Attribute[] {
 		let attributes: Attribute[] = [];
 		for (let key in this.ds.Attributes) {
@@ -149,9 +152,9 @@ export class CharacterService {
 		return {ability: abilityKey, attribute: attributeKey, value: value};
 	}
 	
-	getAdjustedAttributesByCharacter(character: Character): Attribute[] {
+	getAdjustedAttributesByCharacter(character: Character, reverseAdjustment: boolean = false): Attribute[] {
 		let attributes = this.getAdjustedAttributes(character.attributes,
-												character.raceName, character.className);
+												character.raceName, character.className, reverseAdjustment);
 		return attributes;
 	}
 
@@ -161,13 +164,15 @@ export class CharacterService {
 	 * @param  {string}      raceName   Name of the race
 	 * @return {Attribute[]}            Attribute array, adjusted with race modifiers
 	 **/
-	getAdjustedAttributes(attributes: Attribute[], raceName: string, className?: string): Attribute[] {
+	getAdjustedAttributes(attributes: Attribute[], raceName: string, className?: string,
+												reverseAdjustment: boolean = false): Attribute[] {
 
 		let adjustedAttributes: Attribute[] = [];
+		let reverseMod = reverseAdjustment ? -1 : 1
 
 		for (let i = 0; i < attributes.length; i++ ) {
 			let attribute = attributes[i];
-			let mod = this.getAttributeRaceMod(attribute.key,raceName,className)
+			let mod = this.getAttributeRaceMod(attribute.key,raceName,className) * reverseMod;
 			adjustedAttributes.push(new Attribute(attribute.key, attribute.value + mod ));
 		}
 		return adjustedAttributes;
@@ -175,6 +180,37 @@ export class CharacterService {
 	
 	getAlignments(prop?: string): any {
 		return this.ds.getAlignments(prop);
+	}
+	
+	getArmorClassAbilityMod(character: Character): number {
+		let attributes = this.getAdjustedAttributesByCharacter(character);
+		let dex = this.getAttributeByAttributeKey('DEX',attributes);
+		let mod = this.getAbilityModByAbility('armorClass',dex.key,dex.value);
+		return mod.value;
+	}
+	
+	getRawArmorClass(character: Character): number {
+		let ac = this.ds.getBaseArmorClass();
+		let mod = this.getArmorClassAbilityMod(character);
+		return ac + mod;
+	}
+		
+	getArmoredArmorClass(character: Character): number {
+		if (!character.equipment || !character.equipment.filter) return this.getRawArmorClass(character);
+		let gear = character.equipment;
+		let armor = gear.filter(item=>item.type=='Armor');
+		let baseAc = armor.reduce((ac,item:Armor)=> {
+					//if (item.status != GEAR_STATUS.InUse || !item.armorClass) return ac;
+					if (!item.armorClass) return ac;
+					return item.armorClass<ac ? item.armorClass : ac 
+				},this.ds.getBaseArmorClass());
+		let armorMods = armor.reduce((mod,item:Armor)=> {
+					if (item.status != GEAR_STATUS.InUse || !item.armorClassMod) return mod;
+					return item.armorClassMod ? mod + item.armorClassMod : mod 
+				}, 0);
+		let abilityMod = this.getArmorClassAbilityMod(character);
+		let ac = +baseAc + armorMods + abilityMod;
+		return ac;
 	}
 
 	getAttributeByAttributeKey(attributeKey: string, attributes: Attribute[]): Attribute {
@@ -272,6 +308,111 @@ export class CharacterService {
 	getRaces(): any[] {
 		return this.ds.getRaces();
 	}
+	
+	getAttackTable(character: Character): any {
+		let acZeroHit = this.ds.getAcZeroHit(character.className, character.level || 1);
+		let table = new Table('Attack Table','d20 value needed to hit against AC...','Lvl')
+
+		// standard to work from AC -6 to AC 10
+		let row = table.addValueRow(character.level || 1);
+		for (let i = -6; i < 10; i++) {
+			let hit = acZeroHit - i;
+			hit = hit > 20 ? 20 : hit < 2 ? 2 : hit;
+			table.addHeader(i);
+			row.addValue(hit);
+		}
+		
+		return table;
+	}
+	
+	getTurnUndeadTable(character:Character): any {
+		let tableValues;
+		// Clerics get turnUndead Tabel
+		tableValues = this.ds.getTable('turnUndead',character);
+		if (!tableValues) return null;
+
+		let table = new Table('Turn Undead', '2d6 value needed to turn undead of HD...', 'Level', 'Monster HD');
+		table.headers = Object.keys(tableValues);
+		let row = table.addValueRow(character.level || 1);
+		row.values = Object.keys(tableValues).map((key) => {return tableValues[key]})
+			
+		return table;
+	}
+	
+	getThiefSkillsTable(character:Character): any {
+		
+		let tableValues = this.ds.getTable('thiefSkills',character);
+		if (!tableValues) return null;
+		let skillMods = this.getThiefSkillMods(character);
+		let values = this.ds.addObjectsAndValues(tableValues,skillMods);
+		let table = new Table('Thief Skills (modified)','% chance thief will be able to...',
+													'Lvl','Skill');
+		table.headers = Object.keys(values)
+										.map((key) => {return new CaseConvertPipe().transform(key,'FC')});
+		let row = table.addValueRow(character.level || 1);
+		row.values = Object.keys(values)
+									.map((key) => {return Math.round(values[key] * 100) + '%'})
+		return table;
+		
+	}
+	
+	getSpellProgressionTable(character: Character) {
+		let tableValues = this.ds.getTable('spellProgression',character);
+		if (!tableValues) return null;
+			// Characters can have mutiple spell progressions (e.g. rangers
+			// get Druid and Magic-User spells as certain levels).  This
+			// table is arranged {SpellType: {Level: {SpellLevel: number...}}}
+			// we will return this as multiple tables, one for each spell type.
+			// so first we break it out into spell type tables.
+		let table = new Table('Spell Progression','# of memorized spells of level...','Type','Spell Level')
+		
+		let rowNames = Object.keys(tableValues);
+		let headers = []
+		
+		rowNames.forEach( rowName => {
+			let classTable = tableValues[rowName];
+			let levelTable = classTable[character.level || 1];
+			headers = headers.concat(Object.keys(levelTable));
+		});
+		let headerSet = new Set(headers);
+		headers = Array.from(headerSet);
+		headers.sort();
+		table.headers = headers;
+		
+		rowNames.forEach((rowName) => {
+			let row = table.addValueRow(rowName);
+			let classTable = tableValues[rowName];
+			let levelTable = classTable[character.level || 1];
+			// supplement with additional spells for Clerics and Druids
+			if (rowName == 'Cleric' || rowName == 'Druid') {
+				levelTable = this.addAdditionalSpells(levelTable, character);
+			}
+			
+			row.values = headers.map((key) => {return levelTable[key] || 0;});
+
+		});
+		return table
+	}
+	
+	getSavingThrowTable(character: Character): any {
+		let raceName = character.raceName || "Human";
+		let className = character.className || "Fighter";
+		let table = new Table('Saving Throws','d20 value needed to save against...',"Lvl")
+		let savingThrowNames = this.ds.getSavingThrowNames();
+		let row = table.addValueRow(character.level || 1,'text-center');
+
+		for (let i = 0; i < savingThrowNames.length; i++) {
+			let stdObj = this.getSavingThrowDetailObject(savingThrowNames[i], character.level || 1, 
+																										className, raceName, character.attributes);
+			let rollNeeded = stdObj.rollTarget - stdObj.raceMod - stdObj.classMod - stdObj.attributeMod;
+
+			table.addHeader(new CaseConvertPipe().transform(savingThrowNames[i],'FC'));
+			row.addValue(rollNeeded);
+
+		}
+
+		return table;
+	}
 
 	getRelevantTables(character: Character): any[] {
 		let tables = [];
@@ -280,96 +421,28 @@ export class CharacterService {
 		// be the header and values will be the table values
 		
 		// everyone gets an attack table
-		let acZeroHit = this.ds.getAcZeroHit(character.className, character.level);
-		let attackTable = {
-			name: 'Attack Table',
-			description: 'd20 value needed to hit against AC...',
-			details: {
-				headers: [],
-				values: []
-			}
-		};
+		tables.push(this.getAttackTable(character));
 		
-		for (let i = -6; i < 10; i++) {
-			let hit = acZeroHit - i;
-			hit = hit > 20 ? 20 : hit < 2 ? 2 : hit;
-			attackTable.details.headers.push(i);
-			attackTable.details.values.push(hit);
-		}
-		tables.push(attackTable);
+		let turnUndead = this.getTurnUndeadTable(character);
+		if (turnUndead) tables.push(turnUndead)
 		
-		let tableValues;
-		
-		// Clerics get turnUndead Tabel
-		tableValues = this.ds.getTable('turnUndead',character);
-		if (tableValues) {
-			let table = {
-				name: 'Turn Undead',
-				description: '2d6 value needed to turn undead of HD...',
-				details: {
-					headers: Object.keys(tableValues),
-					values: Object.keys(tableValues).map((key) => {return tableValues[key]})
-				}
-			}
-				
-			tables.push(table);
-		}
-
 		// Thieves get theifAbility tabler
-		tableValues = this.ds.getTable('thiefSkills',character);
-		if (tableValues) {
-			let skillMods = this.getThiefSkillMods(character);
-			let values = this.ds.addObjectsAndValues(tableValues,skillMods);
-			let table = {
-				name: 'Thief Skills (modified)',
-				description: '% chance thief will be able to...',
-				details: {
-					headers: Object.keys(values)
-											.map((key) => {return new CaseConvertPipe().transform(key,'FC')}),
-					values: Object.keys(values)
-										.map((key) => {return Math.round(values[key] * 100) + '%'})
-				}
-			}
-			tables.push(table);
-		}
+		let thiefSkills = this.getThiefSkillsTable(character);
+		if (thiefSkills) tables.push(thiefSkills);
+		
+		// Everyone gets saving throws
+		let savingThrows = this.getSavingThrowTable(character);
+		tables.push(savingThrows);
 
 		// magic folks get spell-count table
-		tableValues = this.ds.getTable('spellProgression',character);
-		if (tableValues) {
-			// Characters can have mutiple spell progressions (e.g. rangers
-			// get Druid and Magic-User spells as certain levels).  This
-			// table is arranged {SpellType: {Level: {SpellLevel: number...}}}
-			// we will return this as multiple tables, one for each spell type.
-			// so first we break it out into spell type tables.
-			let tableNames = Object.keys(tableValues);
-			tableNames.forEach((tableName) => {
-				let classTable = tableValues[tableName];
-				let levelTable = classTable[character.level];
-				// supplement with additional spells for Clerics and Druids
-				if (tableName == 'Cleric' || tableName == 'Druid') {
-					levelTable = this.addAdditionalSpells(levelTable, character);
-				}
-				
-				let headers = Object.keys(levelTable);
-				let details = Object.keys(levelTable)
-											.map((key) => {return levelTable[key];});
-				//headers.unshift(" ");
-				//details.unshift(tableName);
-				let table = {
-					name: tableName + ' Spells',
-					description: '# of memorized spells of level...',
-					details: {
-						headers: headers,
-						values: details
-					}
-				}
-				tables.push(table);
-			});
-		}
+		let spellProgression = this.getSpellProgressionTable(character);
+		if (spellProgression) tables.push(spellProgression)
+			
 		return tables;
 	}
 
-	getSavingThrowDetailObject(savingThrowName: string, level: number, className?: string, raceName?: string, attributes?: Attribute[]): SavingThrowDetail {
+	getSavingThrowDetailObject(savingThrowName: string, level: number, className?: string, 
+															raceName?: string, attributes?: Attribute[]): SavingThrowDetail {
 		let stdObj = new SavingThrowDetail();
 		stdObj.savingThrowName = savingThrowName;
 		stdObj.rollTarget = this.ds.getSavingThrow(savingThrowName, className, level);
@@ -379,7 +452,8 @@ export class CharacterService {
 		return stdObj;
 	}
 
-	getSavingThrowList( level: number = 1, raceName: string = 'Human', className: string = "Fighter", attributes?: Attribute[]): any[] {
+	getSavingThrowList( level: number = 1, raceName: string = 'Human', 
+											className: string = "Fighter", attributes?: Attribute[]): any[] {
 		raceName = raceName || "Human";
 		className = className || "Fighter";
 		let savingThrowList: SavingThrowDetail[] = [];
@@ -433,9 +507,10 @@ export class CharacterService {
 		let race = raceName ? this.ds.getRace(raceName) : null;
 		if (!race && raceName) throw `Invalid race name (${raceName})`;
 
-		let adjustedAttributes: any[] = [];
+		//let adjustedAttributes: any[] = [];
 
-		if (attributes) adjustedAttributes = (!raceName) ? attributes : this.getAdjustedAttributes(attributes, raceName);
+		//if (attributes) adjustedAttributes = (!raceName) ? attributes : this.getAdjustedAttributes(attributes, raceName);
+		let adjustedAttributes = attributes;
 
 		let validity = {
 			race: race,
@@ -455,6 +530,15 @@ export class CharacterService {
 			validity.xpAdjustment = this.getXpAdjustment(adjustedAttributes, className)
 		}
 		return validity;
+	}
+	
+	getValueInUnits(targetUnit, amount, sourceUnit) {
+		let target = this.ds.getCurrency(targetUnit);
+		let source = this.ds.getCurrency(sourceUnit);
+		if (!target || !source) throw `dataservice: cannot convert ${sourceUnit} to ${targetUnit}`
+		
+		amount = source.value * amount / target.value;
+		return amount;
 	}
 
 	getXpAdjustment(attributes: Attribute[], className: string): number {

@@ -7,13 +7,13 @@
 		<div class="row" *ngFor="let game of games">
 			<div class="col-md-12">
 				{{game.name}}
-				<span class="btn btn-default" (click)='deleteGame(game.key)'>
+				<span class="btn btn-default" (click)='deleteGame(game.key)' title="Delete Game">
 					<span class="fa fa-minus"></span>
 				</span>
-				<span class="btn btn-default" (click)='editGame(game)'>
+				<span class="btn btn-default" (click)='editGame(game)' title="Edit Game">
 					<span class="fa fa-pencil"></span>
 				</span>
-				<span class="btn btn-default" (click)='runGame(game)'>
+				<span class="btn btn-default" (click)='runGame(game)' title="Run the game">
 					<span class="ra ra-perspective-dice-one"></span>
 				</span>
 			</div>

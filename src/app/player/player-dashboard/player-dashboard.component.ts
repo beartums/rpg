@@ -27,6 +27,13 @@ export class PlayerDashboardComponent implements OnInit {
 	games: any = {};
 	
 	userId
+	
+	idleCharacterButtons = [
+		{ title: 'Continue Character Creation', iconClass: 'fa fa-pencil', 
+			callback: this.continueCharacterCreation.bind(this) },
+		{ title: 'Delete Character', iconClass: 'fa fa-times text-danger', 
+			callback: this.deleteCharacter.bind(this) },
+	]
 
   constructor(private cs: CharacterService, private ds: DataService,
 							private router: Router) { }
@@ -62,24 +69,23 @@ export class PlayerDashboardComponent implements OnInit {
 		});
 	}
 	
-	getAttributeValue(attributeKey,attributes): number {
-		if (!attributes) return 0;
-		return attributes.find(attribute=> { return attribute.key == attributeKey }).value;
-	}
-	
 	leaveGame(character: Character) {
 		this.ds.leaveGame(character, this.games[character.currentGame]);
 	}
 	
+	deleteCharacter(ev, character: Character) {
+		this.ds.removeCharacter(character.key);
+	}
+	
 	playGame(character: Character) {
-		this.router.navigate(['/play-game',character.currentGame,'character',character.key]);
+		this.router.navigate(['/character-sheet',character.key]);
 	}
 	
 	newCharacter() {
 		this.router.navigate(['/character-creation','new','user',this.userId]);
 	}
 	
-	continueCharacterCreation(character) {
+	continueCharacterCreation(ev, character) {
 		this.router.navigate(['/character-creation',character.key,'user',character.userId]);
 	}
 }

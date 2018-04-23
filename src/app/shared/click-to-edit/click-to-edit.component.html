@@ -1,0 +1,19 @@
+<span *ngIf="!isEditing" (click)="startEditing($event)">
+	{{_value}}
+</span>
+<span *ngIf="isEditing">
+	<textarea *ngIf="type=='textarea'" class="form-control form-control-sm"
+		(click)="clickedInside($event)"
+		[(ngModel)]="_value"
+		(keydown.escape)="handleEscape($event)"
+		(keydown.enter)="handleEnter($event)"
+		(keydown.tab)="handleTab($event)"
+	></textarea>
+	<input type="text" *ngIf="type=='text'" class="form-control form-control-sm"
+		(click)="clickedInside($event)"
+		[(ngModel)]="_value"
+		(keydown.escape)="handleEscape($event)"
+		(keydown.enter)="handleEnter($event)"
+		(keydown.tab)="handleTab($event)"
+	>
+</span>

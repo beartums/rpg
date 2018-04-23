@@ -1,0 +1,147 @@
+<div class="container">
+	<div class="card" id="characterSheet"  *ngIf="character$ | async as character; else loading">
+		<div class="card-header fancy">
+			<h2>{{character.name}} 
+				<small class="text-muted" *ngIf="character.nickname">"{{character.nickname}}"</small>
+			</h2>
+		</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-12">
+					<table class="table h-100 my-auto border-0">
+						<tr class="h-100 align-middle text-center border-0">
+							<td class="text-right">
+								<span class="fa fa-heartbeat fa-2x" title="Hitpoints"></span>
+							</td>
+							<td class="text-left">
+								<h4>
+									<span *ngIf="character.temporaryHitPoints || character.temporaryHitPoints===0">
+										{{character.temporaryHitPoints}}/</span>{{character.hitPoints}}</h4>
+							</td>
+							<td class="text-right">
+								<span class="ra ra-shield ra-2x" title="Armor Class"></span>
+							</td>
+							<td class="text-left">
+								<h4>{{getArmoredAc(character)}}</h4>
+							</td>
+							<td class="text-right">
+								<span class="ra ra-gold-bar ra-2x" title="Gold"></span>
+							</td>
+							<td class="text-left">
+								<h4>{{character.gold | number:'0.0-2'}}</h4>
+							</td>
+							<td class="text-right">
+								<span class="ra ra-player-lift ra-2x" title="Level"></span>
+							</td>
+							<td class="text-left">
+								<h4>{{character.level}}</h4>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row border-0">
+				
+				<div class="col-12">
+					<table class="table table-sm border-0 mb-0">
+						<tr class="border-0 bg-secondary text-white">
+						<td class="text-right">Race:</td>
+						<th class="text-left">{{character.raceName}}</th>
+						<td class="text-right">Class:</td>
+						<th class="text-left">{{character.className}}</th>
+						<td class="text-right">Gender:</td>
+						<th class="text-left">{{character.gender}}</th>
+						<td class="text-right">Alignment:</td>
+						<th class="text-left">{{character.alignmentLaw}}/{{character.alignmentGood}}</th>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<table class="table table-sm border-0 mb-0 text-center">
+						<tr class="border-0">
+							<th><span class="ra ra-muscle-up" title="Strength"></span></th>
+							<th><span class="ra ra-feather-wing" title="Dexterity"></span></th>
+							<th><span class="ra ra-raven" title="Intelligence"></span></th>
+							<th><span class="ra ra-rune-stone" title="Wisdom"></span></th>
+							<th><span class="ra ra-kettlebell" title="Constitution"></span></th>
+							<th><span class="ra ra-aura" title="Charisma"></span></th>
+						</tr>
+						<tr class="text-center border-0">
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('STR',character.attributes).value}}</h4></td>
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('DEX',character.attributes).value}}</h4></td>
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('INT',character.attributes).value}}</h4></td>
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('WIS',character.attributes).value}}</h4></td>
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('CON',character.attributes).value}}</h4></td>
+							<td class="border-0 pt-0"><h4>{{cs.getAttributeByAttributeKey('CHA',character.attributes).value}}</h4></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<div class="row">
+						<div class="col-6 text-right">XP:</div>
+						<div class="col-6"><strong>{{character.experiencePoints}}</strong></div>
+					</div>
+					<div class="row">
+						<div class="col-6 text-right">Gear Weight:</div>
+						<div class="col-6"><strong>{{getWeight(character)}}</strong></div>
+					</div>
+					<div class="row">
+						<div class="col-6 text-right">Gear Value:</div>
+						<div class="col-6"><strong>{{getValue(character)}}</strong></div>
+					</div>
+				</div>
+				<div class="col-8">
+					<table class="table table-sm border-0" style="font-size:smaller;">
+						<tr class="border-0">
+							<th>Name</th>
+							<th class=" text-right">$</th>
+							<th class=" text-right">#</th>
+							<th class=" text-right">Qty</th>
+							<th>Props</th>
+							<th>In Use?</th>
+							<th></th>
+						</tr>
+						<ng-container *ngIf="character && character.equipment">
+							<tr *ngFor="let item of character.equipment" class="align-middle border-0">
+								<td>{{item.name}}</td>
+								<td class=" text-right">{{item.cost}}</td>
+								<td class=" text-right">{{item.pounds}}</td>
+								<td class=" text-right">{{item.count}}</td>
+								<td>{{getItemProperties(item)}}</td>
+								<td><strong>
+									<span *ngIf="item.status == GEAR_STATUS.InUse" class="fa fa-check text-success"></span>
+								</strong></td>
+								<td>
+									<button class="btn btn-xs" (click)="toggleInUse(item, character)">
+										<span class="ra ra-hand" *ngIf="item.status !== GEAR_STATUS.InUse"></span>
+										<span class="fa fa-suitcase" *ngIf="item.status === GEAR_STATUS.InUse"></span>
+									</button>
+								</td>
+							</tr>
+						</ng-container>
+					</table>
+				</div>
+			</div>
+			<!--	XP
+
+				weight
+
+				spells memorized/spells available
+				Tables:
+					Saving throws
+					Modifiers
+					attack
+					spells
+					turn undead
+			-->
+		</div>
+	</div>
+</div>
+
+<ng-template #loading>
+	<span class="fa fa-spin fa-spinner fa-2x"></span>
+</ng-template>

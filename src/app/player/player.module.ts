@@ -10,6 +10,7 @@ import { SavingThrowChartComponent }  from './saving-throw-chart.component';
 import { RaceInfoComponent }  from './race-info.component';
 import { ClassInfoComponent }  from './class-info.component';
 import { PlayerDashboardComponent } from './player-dashboard/player-dashboard.component';
+import { CharacterSheetComponent } from './character-sheet/character-sheet.component';
 
 @NgModule({
   imports: [
@@ -18,11 +19,11 @@ import { PlayerDashboardComponent } from './player-dashboard/player-dashboard.co
   declarations:  [CharacterCreationComponent, 
 									SavingThrowChartComponent, 
 									RaceInfoComponent, 
-									ClassInfoComponent, PlayerDashboardComponent],
+									ClassInfoComponent, PlayerDashboardComponent, CharacterSheetComponent],
 	exports: [ CharacterCreationComponent, 
 									SavingThrowChartComponent,
 									RaceInfoComponent, 
 									ClassInfoComponent, 
-					]
+					],
 })
 export class PlayerModule { }

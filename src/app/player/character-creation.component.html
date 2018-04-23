@@ -1,5 +1,5 @@
 	<h2>Character Sheet</h2>
-	<div class="row" *ngIf="character$ | async as character; else loadingBig">
+	<div class="row" *ngIf="character; else loadingBig">
 		<!-- Character Creation Left Half -->
 		<div class="col-md-6">
 
@@ -99,6 +99,7 @@
 											<select-by-label [options]="getValidRaces(character)" 
 												[disabled]="character.stage!=STAGE.Details" 
 												[(selected)]="character.raceName" 
+												(onSelected)="adjustCharacterAttributes($event,character)"
 												displayProperty="name" 
 												returnObject="false" 
 												collapseWhenSelected="true">
@@ -196,13 +197,13 @@
 												(dragover)='allowDrop($event)' (drop)='drop($event)'
 												[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
 												(click)="selectIndex(i,character)" [id]="attribute.key">
-												<span *ngIf="attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)<10">&nbsp;
+												<span *ngIf="attribute.value<10">&nbsp;
 												</span>
-												{{+attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)}}
+												{{+attribute.value}}
 											</span>
-											<span class="notification-badge" *ngIf="getAttributeRaceMod(attribute.key, character.raceName, character.className)!=0">
+											<!--span class="notification-badge" *ngIf="getAttributeRaceMod(attribute.key, character.raceName, character.className)!=0">
 												{{getAttributeRaceMod(attribute.key, character.raceName, character.className) | modifier}}
-											</span>
+											</span-->
 										</div>
 									</div>
 								</div>
@@ -223,13 +224,11 @@
 													(dragover)='allowDrop($event)' (drop)='drop($event)'
 													[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
 													(click)="selectIndex(i)" [id]="attribute.key">
-													<span *ngIf="attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)<10">&nbsp;
+													<span *ngIf="attribute.value<10">&nbsp;
 													</span>
-													{{attribute.value + getAttributeRaceMod(attribute.key, character.raceName, character.className)}}
+													{{attribute.value}}
 												</span>
-												<span class="notification-badge" *ngIf="getAttributeRaceMod(attribute.key, character.raceName, character.className)!=0">
-													{{getAttributeRaceMod(attribute.key, character.raceName, character.className) | modifier}}
-												</span>
+
 											</div>
 										</div>
 								</div>
@@ -250,22 +249,7 @@
 									</div>
 									<div class="col-5 text-right">
 										
-											<span *ngIf='character.stage==STAGE.Equipment  && !status.isLocked'>
-												<button type="button" class="btn btn-sm" 
-																[ngClass]="{'btn-secondary': isCartShowing}"
-																(click)="showCart(cart,character)">
-													<span class="fa fa-shopping-cart"></span>
-												</button>
-
-												<button type="button" class="btn btn-sm" (click)="clearCart(cart)"
-																*ngIf='cart.size>0'>
-													<span class="fa fa-trash"></span>
-												</button>			
-												<button type="button" class="btn btn-sm" (click)="buyCart(cart,character)"
-																*ngIf='isCartBuyable(cart)'>
-													<span class="fa fa-handshake-o"></span>
-												</button>
-											</span>
+											
 
 											&nbsp;
 											
@@ -290,31 +274,23 @@
 									<ngb-tabset>
 										<ngb-tab title="My Stuff">
 											<ng-template ngbTabContent>
-												<span *ngIf="!character || !character.equipment || !character.equipment.gear">
+												<span *ngIf="!character ">
 													<br />
 													<h6>Sorry, you got nothing.</h6>
 												</span>
-												<equipment *ngIf="character && character.equipment && character.equipment.gear"
-														[gear]="character.equipment.gear"
-														[cart]="setFrom(character.equipment.gear)"
-														[isGrouped]="false" 
-														[showTotals]="true" [character]="character"
-														[showQuantity]="true" [isCart]="false">
-												</equipment>
+												<select-gear *ngIf="character" [(sourceEquipment)]="character.equipment"
+																			[(sourceGold)]="character.gold"
+																			[allowAll]="true">
+												</select-gear>
+
 											</ng-template>
 										</ngb-tab>
-										<ngb-tab title="Shopping Cart" *ngIf="isCartShowing && !status.isLocked ">
+										<ngb-tab title="Shopping Cart" 
+														*ngIf="character.stage==STAGE.Equipment && !status.isLocked ">
 											<ng-template ngbTabContent>
-												<span *ngIf="!cart || cart.size<1">
-													<br />
-													<h6>Nothing in your cart.  Pick some stuff from the 'Equipment'
-													tab on the right</h6>
-												</span>
-												<equipment *ngIf="cart.size > 0" [gear]="arrayFrom(cart)" 
-														[cart]="cart" [isGrouped]="false" 
-														[showQuantity]="true" [isCart]="true"
-														[showTotals]="true" [character]="character">
-												</equipment>
+												<select-gear [(targetEquipment)]="character.equipment"
+																			[(targetGold)]="character.gold">
+												</select-gear>
 											</ng-template>
 										</ngb-tab>
 									</ngb-tabset>
@@ -348,7 +324,7 @@
 						<ngb-tabset>
 							<ngb-tab title="Saving Throws">
 								<ng-template ngbTabContent>
-									<saving-throw-chart [attributes]="getAdjustedAttributes(character.attributes)" [raceName]="character.raceName" [className]="character.className" [level]="character.level" [attributesJson]="JSON.stringify(character.attributes)">
+									<saving-throw-chart [attributes]="character.attributes" [raceName]="character.raceName" [className]="character.className" [level]="character.level" [attributesJson]="JSON.stringify(character.attributes)">
 									</saving-throw-chart>
 								</ng-template>
 							</ngb-tab>
@@ -382,47 +358,21 @@
 							</ngb-tab>
 							<ngb-tab title="Tables" class="small" *ngIf="character.attributes && character.attributes.length>0">
 								<ng-template ngbTabContent>
-									<table class="table table-specs">
-										<ng-container *ngFor="let table of cs.getRelevantTables(character)">
-											<tr>
-												<td>
-													<h5>
-														{{table.name}} 
-														<small class="text-muted">
-															{{table.description}}
-														</small>
-													</h5>	
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<table class="table table-sm">
-														<tr>
-															<th *ngFor="let th of table.details.headers">
-																{{th}}
-															</th>
-														</tr>
-														<tr>
-															<td *ngFor="let td of table.details.values">
-																{{td}}
-															</td>
-														</tr>
-													</table>
-												</td>
-											</tr>
-										</ng-container>
-									</table>
+									<ng-container *ngFor="let table of cs.getRelevantTables(character)">
+										<display-table *ngIf="table.type=='TableClass'" [table]="table">
+										</display-table>
+									</ng-container>
 								</ng-template>
 							</ngb-tab>
 						</ngb-tabset>
 					</ng-template>
 				</ngb-tab>
-				<ngb-tab title="Equipment">
+				<!--ngb-tab title="Equipment">
 					<ng-template ngbTabContent>
 						<equipment [isShopping]="isCartShowing" [(cart)]="cart" 
 											[showQuantity]="isCartShowing" [showTotals]="false"></equipment>
 					</ng-template>
-				</ngb-tab>
+				</ngb-tab-->
 				
 			</ngb-tabset>
 		</div>

@@ -7,10 +7,12 @@ export class Game {
 	name: string;
 	description: string;
 	options: GameOptions = new GameOptions();
-	notes;
 	turnsPassed: string;
 	dungeon: string;	
 	isLocked: boolean;
+	notes: Note[];
+	monstersDefeated: Monster[];
+	treasureFound: Treasure[];
 }
 
 export class GameOptions {
@@ -34,7 +36,37 @@ export class GameOptions {
 	useRaceClassRestrictions: boolean = false;
 }
 
-export class GameNote {
+export class Note {
+	key: string;
+	parentId: string;
 	date: Date;
-	note: string;
+	datetime: Date;
+	text: string;
+	isVisibleToPlayers: boolean = false;
+	isEditableByPlayers: boolean = false;
+}
+
+export class Treasure {
+	key: string;
+	gameId: string;
+	playerId: string;
+	gpValue: number;
+	type: TreasureType;
+	quantity: number;
+	description: string;
+	note: Note;
+}
+
+export enum TreasureType {
+	Gold, Electrum, Copper, Silver, Platinum, Gem, Jewelry, Weapon, Armor, Wand, Scroll,
+}
+
+export class Monster {
+	key: string;
+	gameId: string;
+	hd: number;
+	hdMod: number;
+	name: string;
+	monsterReferenceId: string;
+	note: Note;
 }
