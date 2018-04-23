@@ -9,7 +9,8 @@ export class CharacterListButton {
 	title: string;
 	iconClass: string;
 	buttonClass: string;
-	callback;
+	isHidden?: function;
+	callback: function;
 	
 	constructor(callback,iconClass,title, buttonClass) {
 		this.callback = callback;
@@ -58,6 +59,12 @@ export class CharacterListComponent implements OnInit {
 	getAttributeValue(attributeKey,attributes): number {
 		if (!attributes) return 0;
 		return attributes.find(attribute=> { return attribute.key == attributeKey }).value;
+	}
+	
+	getButtonClasses(btn: CharacterListButton, character:Character): string {
+		let classes = btn.buttonClass || "";
+		if (btn.isHidden && btn.isHidden(character)) classes += " invisible";
+		return classes;
 	}
 	
 	getHP(character:Character): string {

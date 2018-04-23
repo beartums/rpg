@@ -320,7 +320,9 @@ export class CharacterCreationComponent implements OnInit {
 				character.stage < STAGE.Details) return;
 				
 		if (character.stage == STAGE.Equipment) {
-			character.stage = STAGE.Spells;
+			// HACKY: spell progression tables will be null if there are no current spells
+			// for this character
+			character.stage = this.cs.getSpellProgressionTable(character) ? STAGE.Spells : STAGE.Complete;
 		} else {
 			character.stage = STAGE.Equipment;
 		}

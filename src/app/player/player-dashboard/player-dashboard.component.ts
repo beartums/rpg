@@ -29,7 +29,8 @@ export class PlayerDashboardComponent implements OnInit {
 	userId
 	
 	idleCharacterButtons = [
-		{ title: 'Continue Character Creation', iconClass: 'fa fa-pencil', 
+		{ title: 'Continue Character Creation', iconClass: 'fa fa-pencil',
+			isHidden: this.canContinueCreation.bind(this),
 			callback: this.continueCharacterCreation.bind(this) },
 		{ title: 'Show Character Sheet', iconClass: 'fa fa-id-badge', 
 			callback: this.playGame.bind(this) },
@@ -89,5 +90,9 @@ export class PlayerDashboardComponent implements OnInit {
 	
 	continueCharacterCreation(ev, character) {
 		this.router.navigate(['/character-creation',character.key,'user',character.userId]);
+	}
+	
+	canContinueCreation(character): boolean {
+		return character.stage >= STAGE.Complete;
 	}
 }

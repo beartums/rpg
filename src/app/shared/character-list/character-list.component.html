@@ -50,7 +50,8 @@
 				</td>
 				<td class="text-right">
 					<button *ngFor="let btn of buttons" class="btn btn-xs mr-2" [attr.title]="btn.title"
-									[ngClass]="btn.buttonClass" (click)='btn.callback($event,character)'>
+									[ngClass]="getButtonClasses(btn, character)" 
+									(click)='btn.callback($event,character)'>
 						<span [ngClass]="btn.iconClass"></span>
 					</button>
 				</td>					
