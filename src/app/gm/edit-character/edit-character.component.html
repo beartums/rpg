@@ -79,7 +79,7 @@
 		</div>
 	</div>
 	<div class="row h-100 align-items-end">
-		<div class="col-4">
+		<div class="col-3">
 			<label for="player">Played By</label>
 			<select class="form-control form-control-sm" id="player" [(ngModel)]="_character.userId">
 				<option *ngFor="let player of players$ | async" [ngValue]="player.key">
@@ -87,19 +87,27 @@
 				</option>
 			</select>
 		</div>
-		<div class="col-3">
+		<div class="col-5">
 			<div class="row">
-				<div class="col-6">
+				<div class="col-4">
 					<label for="atRolls">Att. Rolls</label>
 					<input class="form-control form-control-sm" id="atRolls" [(ngModel)]="_character.attributeRolls">
 				</div>
-				<div class="col-6">
+				<div class="col-4">
 					<label for="xpRolls">Xp Rolls</label>
 					<input class="form-control form-control-sm" id="xpRolls" [(ngModel)]="_character.xpRolls">
 				</div>
+				<div class="col-4">
+					<label for="gender">Gender</label>
+					<select class="form-control form-control-sm" id="gender" [(ngModel)]="_character.gender">
+						<option *ngFor="let g of ['Male','Female','It\'s Complicated']" [ngValue]="g">
+							{{g}}
+						</option>
+					</select>
+				</div>
 			</div>
 		</div>
-		<div class="col-5 text-right">
+		<div class="col-4 text-right">
 			<button type="button" class="btn btn-default" [disabled]="this.isChanged()" (click)="reset()">Reset</button>
 			&nbsp;
 			<button type="button" class="btn btn-default" (click)="cancel()">Cancel</button>

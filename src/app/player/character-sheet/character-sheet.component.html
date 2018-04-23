@@ -40,21 +40,20 @@
 					</table>
 				</div>
 			</div>
-			<div class="row border-0">
-				
-				<div class="col-12">
-					<table class="table table-sm border-0 mb-0">
-						<tr class="border-0 bg-secondary text-white">
-						<td class="text-right">Race:</td>
-						<th class="text-left">{{character.raceName}}</th>
-						<td class="text-right">Class:</td>
-						<th class="text-left">{{character.className}}</th>
-						<td class="text-right">Gender:</td>
-						<th class="text-left">{{character.gender}}</th>
-						<td class="text-right">Alignment:</td>
-						<th class="text-left">{{character.alignmentLaw}}/{{character.alignmentGood}}</th>
-						</tr>
-					</table>
+			<div class="row border-0 bg-secondary text-white">
+				<div class="col-12 d-flex">
+						<div class="mx-auto">
+							Race: <strong>{{character.raceName}}</strong>
+						</div>
+						<div class="mx-auto">
+							Class: <strong>{{character.className}}</strong>
+						</div>
+						<div class="mx-auto">
+							Gender: <strong>{{character.gender}}</strong>
+						</div>
+						<div class="mx-auto">
+							Alignment: <strong>{{character.alignmentLaw}}/{{character.alignmentGood}}</strong>
+						</div>	
 				</div>
 			</div>
 			<div class="row">
@@ -80,6 +79,7 @@
 				</div>
 			</div>
 			<div class="row">
+				<br />
 				<div class="col-4">
 					<div class="row">
 						<div class="col-6 text-right">XP:</div>
