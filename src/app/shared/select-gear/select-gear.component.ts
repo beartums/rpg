@@ -13,7 +13,7 @@ import { debounceTime, switchMap, distinctUntilChanged, tap } from 'rxjs/operato
 
 import * as _ from 'lodash';
 
-import { Character, Gear } from '../../character.class';
+import { Character, Gear, GEAR_STATUS } from '../../character.class';
 
 import { CharacterService } from '../../character.service';
 import { DataService } from '../../data.service';
@@ -66,6 +66,8 @@ export class SelectGearComponent implements OnInit {
 	
 	_targetEquipment;
 	_sourceEquipment;
+	
+	GEAR_STATUS = GEAR_STATUS;
 	
   constructor(private cs: CharacterService, private ds: DataService) {
 	}
@@ -395,4 +397,10 @@ export class SelectGearComponent implements OnInit {
 		return totals;
 	}
 
+	toggleGearStatus(item:Gear) {
+		if (item.status == GEAR_STATUS.InUse) item.status = GEAR_STATUS.Stowed;
+		else item.status = GEAR_STATUS.InUse;
+		this.sourceEquipmentChange.emit(this.sourceEquipment);
+		this._sourceEquipment = _.cloneDeep(this.sourceEquipment);
+	}
 }

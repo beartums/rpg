@@ -1,7 +1,7 @@
 <div class="container-fluid">
 	<div class="row" id="SearchAndSummary">
 		<div class="col-12 text-center align-middle">
-			<div class="badge badge-secondary d-flex">
+			<div class="badge badge-light d-flex">
 				<span class="my-auto mr-auto" title="Selected Gear Value">
 					<span class="ra ra-gold-bar text-warning my-auto"></span>
 					{{selectedGearSummary.value | number:'0.0-2'}}
@@ -19,20 +19,20 @@
 				</span>
 
 				<span class="mx-auto my-auto">
-					<button class="btn btn-light btn-xs" 
+					<button class="btn btn-outline-secondary btn-xs" 
 								[disabled]="(targetGold && targetGold < selectedGearSummary.value) 
 														|| selectedGearSummary.itemCount<1"
 								(click)="completeTransaction(mode,false)"
 								title="Transfer the gear and the gold">
 						<span class="fa fa-handshake-o"></span>
 					</button>
-					<button class="btn btn-light btn-xs" 
+					<button class="btn btn-outline-secondary btn-xs" 
 								[disabled]="selectedGearSummary.itemCount < 1"
 								(click)="completeTransaction(mode,true)"
 								title="Gift the gear; no gold changes hands">
 						<span class="fa fa-gift"></span>
 					</button>
-					<button class="btn btn-light btn-xs" 
+					<button class="btn btn-outline-secondary btn-xs" 
 								[disabled]="selectedGearSummary.itemCount < 1"
 								(click)="clearSelected()"
 								title="Clear all selections">
@@ -83,7 +83,7 @@
 						<th colspan="2" class="text-center">Cost</th>
 						<th class="text-right">Lbs</th>
 						<th>Props</th>
-						<th></th>
+						<th title="Item Status" *ngIf="sourceEquipment"></th>
 					</tr>
 					<ng-container *ngFor="let item of items">
 						<tr	[ngClass]="isItemSelected(item) ? 'bg-success text-white' : ''">
@@ -117,6 +117,14 @@
 							<td class="text-left">{{item.denomination}}</td>
 							<td class="text-right align-middle">{{item.pounds}}</td>
 							<td class="align-middle">{{getItemProperties(item)}}</td>
+							<td class="align-middle text-center" [attr.title]="GEAR_STATUS[item.status]"
+										*ngIf="sourceEquipment">
+								<span class="fa" 
+									[ngClass]="item.status==GEAR_STATUS.InUse ? 
+																'fa-toggle-on text-success' : 'fa-toggle-off'"
+									(click)="toggleGearStatus(item)">
+								</span>
+							</td>
 							<td class="text-right align-middle h-100">
 									<button class="table-btn btn-xs" 
 											[ngClass]="canUnselectItem(item) ? 'visible' : 'invisible'"
@@ -138,7 +146,7 @@
 								[ngClass]="isItemSelected(item) ? 'bg-success text-white' : ''">
 							<td class="bt-0 pt-0 mt-0"></td>
 							<td class="text-smaller font-italic bt-0 pt-0 mt-0"
-									[attr.colspan]="8 - (allowSelections ? 1 : 0) - (sourceEquipment ? 0 : 1)">
+									[attr.colspan]="8 - (allowSelections ? 1 : 0) - (sourceEquipment ? 0 : 2)">
 								{{item.notes}}
 							</td>
 						</tr>
