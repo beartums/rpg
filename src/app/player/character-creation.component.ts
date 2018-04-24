@@ -5,7 +5,6 @@ import { Observable } from 'rxjs/Observable';
 import { Character, Attribute, STAGE, Gear } from '../character.class';
 import { CharacterService } from '../character.service';
 import { DataService } from '../data.service';
-import { HostListener } from '@angular/core';
 import * as _ from 'lodash'; 
 
 @Component({
@@ -27,11 +26,6 @@ export class CharacterCreationComponent implements OnInit {
 	
 	rollCount: number = 0;
 	allowedRolls: number = 3;
-	
-	// for dragging and dropping attributes
-	draggingKey: string = '';
-
-	selectedIndex:number;
 	
 	STAGE = STAGE;
 	JSON = JSON;
@@ -85,16 +79,6 @@ export class CharacterCreationComponent implements OnInit {
 		return character;
 	}
 	
-	generateAttributes(character:Character): void {
-		character.attributes = this.cs.generateAttributesArray();
-		this.selectedIndex = null;
-		character.attributeRolls++;
-		// $|async as character NOT setting this.character.
-		this.character = character;
-		// save values
-		this.saveProgress(character);
-	}
-
 	generateName(character: Character): void {
 		let raceName = character.raceName;
 		let gender = character.gender;
@@ -204,100 +188,6 @@ export class CharacterCreationComponent implements OnInit {
 		return validRaces;
 	}
 
-	@HostListener('window:keydown', ['$event'])
-/**
- * Listen for keyboard shortcuts
- * @param  {any}    event Keyboard event object
- * @return {void}
- */
-	keyboardInput(event: any) {
-
-		// if nothing is selected, or the pressed key is not one we are capturing
-		// just return.
-		if (!this.selectedIndex && this.selectedIndex!==0) return;
-		if (event.key!="ArrowDown" && event.key!="ArrowUp" && event.key !="Escape") return;
-
-		// prevent any other DOM element from capturing
-		event.preventDefault();
-
-		// Unselect all attributes on Escape
-		if (event.key=="Escape") {
-				this.selectedIndex = null;
-				return;
-		}
-
-		// keydown moves the attribute value to the next attribute,
-		// keyup moves it to the previous attribute
-		let a = this.character.attributes[this.selectedIndex];
-		let newIndex: number
-
-		if (event.key == "ArrowDown") {
-		 	if (this.selectedIndex >= this.character.attributes.length-1) return;
-			newIndex = this.selectedIndex + 1;
-		} else if (event.key=="ArrowUp") {
-			if (this.selectedIndex <1) return;
-			newIndex = this.selectedIndex-1;
-		}
-
-		// swap values
-		let b = this.character.attributes[newIndex];
-		let c = a.value;
-		a.value = b.value;
-		b.value = c;
-		// move selection to the attribute that got the moving value
-		this.selectedIndex = newIndex;
-		//this.ds.updateCharacter(this.character);
-
-	}
-
-	/**
-	 * Handle the dropping of an attribute from drag and dropping:
-	 * swap the value of the dropped att with the target att
-	 * @param {any} event Event object
-	 */
-	drop(event:any): void {
-		//console.log(event);
-		// get the target attribute
-		let key = event.srcElement.id;
-		let targetAttribute = this.getAttribute(this.character.attributes, key);
-		// gt the source attribute
-		//key = event.dragData.key;
-		key = this.draggingKey;
-		let sourceAttribute = this.getAttribute(this.character.attributes, key);
-		this.draggingKey = '';
-		
-		if (!targetAttribute || !sourceAttribute || sourceAttribute == targetAttribute) return;
-		//[sourceAttribute.value, targetAttribute.value] = 
-		//		[targetAttribute.value, sourceAttribute.value];
-		let hold = sourceAttribute.value;
-		sourceAttribute.value = targetAttribute.value;
-		targetAttribute.value = hold;
-		
-		//this.ds.updateCharacter(this.character);
-
-	}
-	
-	dragStart(event: any) {
-		//console.log(event);
-		this.draggingKey = event.srcElement.id;
-	}
-	allowDrop(event) {
-		event.preventDefault();
-	}
-
-	toggleAttributeStage(character) {
-		// if stage is completed, cannot toggle the attributes
-		if (character.stage > STAGE.Equipment) return;
-		// if stage is details, then moving back to attributes
-		else if (character.stage == STAGE.Details) {
-			this.clearDetails(character) // make sure the details are nulled
-			character.stage = STAGE.Attributes;
-		} else {
-			character.stage = STAGE.Details;			
-		}
-		this.saveProgress(character);
-	}
-
 	toggleDetailsStage(character: Character) {
 		if (character.stage == STAGE.Attributes) return;
 		// if stage is details, then moving on to completed
@@ -377,15 +267,6 @@ export class CharacterCreationComponent implements OnInit {
 		character.nickname = null;
 	}
 
-	/**
-	 * Select an attribute index to be moved by keyboard arrows
-	 * @param {number} idx Index of the attribute to be moved
-	 */
-	selectIndex(idx: number, character:Character): void {
-		if (character.stage != STAGE.Attributes) return;
-		if (this.selectedIndex == idx) this.selectedIndex = null;
-		else this.selectedIndex = idx;
-	}
 	
 	isIn(a: any[], lookup: any): boolean {
 		if (!a || !a.length) return true;
