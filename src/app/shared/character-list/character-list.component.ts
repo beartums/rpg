@@ -9,8 +9,9 @@ export class CharacterListButton {
 	title: string;
 	iconClass: string;
 	buttonClass: string;
-	isHidden?: function;
-	callback: function;
+	isHidden?: (character: Character) => boolean;
+	isGone?: (character: Character) => boolean;
+	callback: (event: Event, character: Character) => boolean;
 	
 	constructor(callback,iconClass,title, buttonClass) {
 		this.callback = callback;

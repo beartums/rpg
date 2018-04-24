@@ -49,11 +49,14 @@
 					<span class="fa" [ngClass]="getProgressionIconName(character)"></span>
 				</td>
 				<td class="text-right">
-					<button *ngFor="let btn of buttons" class="btn btn-xs mr-2" [attr.title]="btn.title"
-									[ngClass]="getButtonClasses(btn, character)" 
-									(click)='btn.callback($event,character)'>
-						<span [ngClass]="btn.iconClass"></span>
-					</button>
+					<ng-container *ngFor="let btn of buttons">
+						<button *ngIf="!btn.isGone || !btn.isGone(character)" class="btn btn-xs mr-2" 
+										[attr.title]="btn.title"
+										[ngClass]="getButtonClasses(btn, character)" 
+										(click)='btn.callback($event,character)'>
+							<span [ngClass]="btn.iconClass"></span>
+						</button>
+					</ng-container>
 				</td>					
 			</tr>
 
