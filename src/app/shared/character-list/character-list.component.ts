@@ -1,4 +1,5 @@
-import { Component, OnInit, Input, Output, OnChanges, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, OnChanges, 
+				EventEmitter, SimpleChanges, HostListener } from '@angular/core';
 
 import * as _ from 'lodash';
 
@@ -37,19 +38,52 @@ export class CharacterListComponent implements OnInit {
 	
 	@Input() allowSelect: boolean = true;
 	
-	selectedCharacterKey: string;
+	selectedCharacterKey: string;		// determine equivalence when character is updated from firebase
 	showArmoredAc: boolean = true;
 	
 	STAGE = STAGE;
 	
 	constructor(private cs: CharacterService) { }
 
-  ngOnInit() {
+  ngOnInit() {		
   }
+	
+	ngOnChange(changes: SimpleChanges) {
+		for (let prop in changes) {
+			if (prop == "selectedCharacter") {
+				if (!this.selectedCharacter) {
+					this.selectedCharacterKey = null
+				}
+			}
+		}
+	}
+	
+	ngOnDestroy() {
+	}
+	
+	@HostListener('window:keydown', ['$event'])
+		keyboardInput(event: any) {
+			if (!this.allowSelect) return;
+			
+			if (["ArrowUp","ArrowDown","Escape"].indexOf(event.key)<0) return;
+			
+			switch (event.key) {
+				case 'ArrowUp':
+					this.gotoAdjacentCharacter(this.selectedCharacterKey,-1);
+					break;
+				case 'ArrowDown':
+					this.gotoAdjacentCharacter(this.selectedCharacterKey,1);
+					break;
+				case 'Escape':
+					this.clearSelected()
+					break;
+			}
+		}
 
 	clearSelected() {
 		this.selectedCharacter = null;
 		this.selectedCharacterKey = null;
+		this.selectedCharacterChange.emit(null);
 	}
 	
 	getAc(character,useArmor) {
@@ -81,6 +115,16 @@ export class CharacterListComponent implements OnInit {
 		let icons = ['fa-thermometer-empty', 'fa-thermometer-quarter', 'fa-thermometer-half',
 							'fa-thermometer-three-quarters', 'fa-thermometer-full'];
 		return icons[character.stage];
+	}
+	
+	gotoAdjacentCharacter(characterKey,moveCount) {
+		let character = this.characters.find( c => c.key == characterKey );
+		if (!character) return;
+		let idx = this.characters.indexOf(character);
+		if (moveCount + idx > this.characters.length+1 || moveCount + idx < 0) return;
+		this.selectedCharacter = this.characters[moveCount+idx]
+		this.selectedCharacterKey = this.selectedCharacter.key;
+		this.selectedCharacterChange.emit(this.selectedCharacter);
 	}
 
 	select(character: Character) {

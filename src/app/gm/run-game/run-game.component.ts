@@ -29,7 +29,6 @@ export class RunGameComponent implements OnInit {
 	
 	key: string;
 	selectedCharacter;
-	selectedCharacterKey;
 	timeoutId;
 	
 	showArmoredAc: boolean = false;
@@ -57,13 +56,13 @@ export class RunGameComponent implements OnInit {
 		keyboardInput(event: any) {
 			if (!this.selectedCharacter) return;
 
-			if (event.key!="ArrowDown" && event.key!="ArrowUp") return;
+			if (event.code!="NumpadSubtract" && event.code!="NumpadAdd") return;
 			// HACK: Debounce
 			if (this.timeoutId) clearTimeout(this.timeoutId);
 			
-			if (event.key=="ArrowDown") {
+			if (event.code=="NumpadSubtract") {
 				this.adjustHitPoints(this.selectedCharacter,-1);
-			} else if (event.key=="ArrowUp") {
+			} else if (event.code=="NumpadAdd") {
 				this.adjustHitPoints(this.selectedCharacter,1);
 			}
 			return;
@@ -177,20 +176,8 @@ export class RunGameComponent implements OnInit {
 	
 	clearSelected() {
 		this.selectedCharacter = null;
-		this.selectedCharacterKey = null;
 	}
 	
-	select(character) {
-		if (this.selectedCharacterKey == character.key) {
-			this.clearSelected();
-			return;
-		}
-		this.selectedCharacterKey = character.key;
-		this.selectedCharacter = character;
-		// necessary because firebase doesn't save empty properties
-		if (!character.equipment) character.equipment = [];
-	}
-		
 	changeGameStatus(game) {
 		this.gmds.updateGame(this.key,game);
 	}

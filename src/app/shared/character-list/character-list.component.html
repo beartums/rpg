@@ -20,8 +20,8 @@
 			<th><span class=""></span> </th>
 			<th></th>
 		</tr>
-			<tr *ngFor="let character of characters"
-				(click)="select(character)" 
+			<tr *ngFor="let character of characters; let i = index"
+				(click)="select(character,i)" 
 				[ngClass]="selectedCharacterKey==character.key ? 'bg-success text-white' : ''">
 				<td>{{character.name}}</td>
 				<td class="text-center" [attr.title]="character.gender"> 
