@@ -1,0 +1,122 @@
+<div class="row">
+	<div class="col-12">
+		<table class="table table-sm border-0">
+			<tr class="border-0">
+				<td class="text-right border-0 align-middle">Name: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="15" [(ngModel)]="monster.name">
+				</td>
+				<td class="text-right border-0 align-middle">Damage: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="10" [(ngModel)]="monster.damage">
+				</td>
+				<td class="text-right border-0 align-middle">HD: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.hd">
+				</td>
+				<td class="text-right border-0 align-middle">AC: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.ac">
+				</td>
+				<td class="text-right border-0 align-middle">Attacks: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.attacks">
+				</td>
+			</tr>
+			<tr class="border-0">
+				<td class="text-right border-0 align-middle">Attack Types: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="15" [(ngModel)]="monster.attackTypes">
+				</td>
+				<td class="text-right border-0 align-middle">Special: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="10" [(ngModel)]="monster.specialAttacks">
+				</td>
+				<td class="text-right border-0 align-middle">xp: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.xp">
+				</td>
+				<td class="text-right border-0 align-middle">ST: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.savingThrow">
+				</td>
+				<td class="text-right border-0 align-middle">Hoard: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.hoardClass">
+				</td>
+			</tr>
+			<tr class="border-0">
+				<td class="text-right border-0 align-middle">Num:</td>
+				<td class="border-0 align-middle">
+					<div class="row">
+						<div class="col pr-1">
+							<input class="form-control form-control-sm form-inline" size="2" [(ngModel)]="monster.encNum">
+						</div>
+						<div class="col-1 p-1 text-center">
+							/
+						</div>
+						<div class="col pl-1">
+							<input class="form-control form-control-sm form-inline" size="2" [(ngModel)]="monster.lairNum">
+						</div>
+					</div>
+				</td>
+				<td  class="text-right border-0 align-middle">Move: </td>
+				<td  class="border-0 align-middle">
+					<div class="row">
+						<div class="col pr-1">
+							<input class="form-control form-control-sm form-inline" size="2" [(ngModel)]="monster.encMovement">
+						</div>
+						<div class="col-1 p-1 text-center">
+							/
+						</div>
+						<div class="col pl-1">
+							<input class="form-control form-control-sm form-inline" size="2" [(ngModel)]="monster.movement">
+						</div>
+					
+					</div>
+				</td>
+				<td class="text-right border-0 align-middle">Align: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="3" [(ngModel)]="monster.alignment">
+				</td>
+				<td class="text-right border-0 align-middle">Morale: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="1" [(ngModel)]="monster.morale">
+				</td>
+				<td class="text-right border-0 align-middle">type: </td>
+				<td class="border-0 align-middle">
+					<input class="form-control form-control-sm" size="2" [(ngModel)]="monster.type">
+				</td>
+			</tr>
+			<tr *ngIf="monster.additionalCharacteristics | objectAsValues as chars">
+				<td class="text-right align-top border-0">Additional: </td>
+				<td colspan="9" class="border-0 align-middle" [attr.title]="stringify(monster.additionalCharacteristics)">
+					<ng-container *ngFor="let char of chars">
+						<strong>{{char.key}}:</strong>&nbsp;{{char.value}};&nbsp;
+					</ng-container>
+				</td>
+			</tr>
+			<tr>
+				<td class="text-right align-top border-0">Description: </td>
+				<td colspan="9" class="border-0 align-middle">
+					<textarea class="form-control form-control-sm" [(ngModel)]="monster.description">
+					</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="10">
+					<button class="btn mr-2" [disabled]="!isChanged(monster)" (click)="reset(monster)">
+						Reset
+					</button>
+					<button class="btn mr-2" (click)="cancel()">
+						Cancel
+					</button>
+					<button class="btn mr-2" [disabled]="!isChanged(monster)" [ngClass]="{'btn-default': isChanged(monster)}"
+									(click)="save(monster)">
+						Save
+					</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>

@@ -1,0 +1,145 @@
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-9">
+				<h4 *ngIf="!character.name">Details</h4>
+				<h4 *ngIf="character.name">
+				<strong>
+					<span class="fancy">{{character.name}}</span>
+					<small class="text-muted" *ngIf="character.nickname">
+						"{{character.nickname}}"
+					</small>
+				</strong>
+				</h4>
+			</div>
+			<div class="col-3 text-right">
+				<span *ngIf="allowedRolls>character.xpRolls && !status.isLocked">
+					Locks: {{allowedRolls-character.xpRolls}}
+				</span>
+				<span class="btn-group-sm">
+					<button type="button" class="btn btn-default btn-sm" (click)="toggleDetailsStage(character)" 
+										[disabled]="character.stage == STAGE.Attributes 
+														|| character.stage > STAGE.Equipment
+														|| !isDetailsValid(character) 
+														|| allowedRolls <= character.xpRolls
+														|| status.isLocked">
+						<span class="fa "  
+						[ngClass]="{'fa-lock': character.stage!=STAGE.Details, 'fa-unlock': character.stage==STAGE.Details}"></span>
+					</button>
+				</span>
+			</div>
+		</div>
+		<div class="row" *ngIf="character.stage>STAGE.Details || isDetailsValid(character)">
+			<div class="col-12">
+				<strong>
+					<em>
+						<span>
+						{{getCharacterDescription(character)}}
+						</span>
+					</em>
+				</strong>
+			</div>
+		</div>
+	</div>
+	<div class="card-body" style="padding-top: 0px; padding-bottom: 0px">
+		<div class="row" *ngIf="character.stage == STAGE.Details">
+			<div class='col-12'>
+				<span class="input-group">
+					<span class="input-group-btn btn-group-sm">
+						<button type="button" class="btn btn-default btn-sm" (click)="generateName(character)" [disabled]="!character.raceName || character.stage!=STAGE.Details">
+							<span class="fa fa-magic"></span>
+						</button>
+					</span>
+					<input type="text" class="form-control form-control-sm" 
+									[(ngModel)]="character.name" placeholder="Name" 
+									name="name" [disabled]="character.stage!=STAGE.Details">
+					<input type="text" class="form-control form-control-sm" 
+									[(ngModel)]="character.nickname" placeholder="NickName" 
+									name = "nickname" [disabled]="character.stage!=STAGE.Details"
+									*ngIf="character.stage==STAGE.Details || character.nickname">
+				</span>
+			</div>
+		</div>
+
+		<!--Selectors: Gender/class/race/alignment-->
+		<div class="container">
+			<div class="row" *ngIf="character.stage<=STAGE.Details || !isDetailsValid(character)">
+				<div class="col-md-12">
+					<label>
+						Gender: 
+						<select-by-label 
+						[options]="['Male','Female','It\'s Complicated']" 
+						[disabled]="character.stage!=STAGE.Details" 
+						[(selected)]="character.gender" 
+						collapseWhenSelected="true">
+						</select-by-label>
+					</label>
+					<br *ngIf='!character.className' />
+					<label>
+						Class:
+						<select-by-label [options]="getValidClasses(character)" 
+						[disabled]="character.stage!=STAGE.Details" 
+						[(selected)]="character.className" 
+						displayProperty="name" 
+						returnObject="false" 
+						collapseWhenSelected="true">
+						</select-by-label>
+					</label>
+					<br *ngIf='!character.raceName' />
+					<label>
+						Race:
+						<select-by-label [options]="getValidRaces(character)" 
+							[disabled]="character.stage!=STAGE.Details" 
+							[(selected)]="character.raceName" 
+							(onSelected)="adjustCharacterAttributes($event,character)"
+							displayProperty="name" 
+							returnObject="false" 
+							collapseWhenSelected="true">
+						</select-by-label>
+					</label>
+					<br *ngIf='!character.alignmentLaw || !character.alignmentGood' />
+					<label>
+						Align:
+							<select-by-label [options]="['Lawful','Neutral','Chaotic']" 
+							[disabled]="character.stage!=STAGE.Details" 
+							[(selected)]="character.alignmentLaw" 
+							collapseWhenSelected="true">
+							</select-by-label>
+						/
+							<select-by-label [options]="['Good','Neutral','Evil']" 
+							[disabled]="character.stage!=STAGE.Details" 
+							[(selected)]="character.alignmentGood" 
+							collapseWhenSelected="true">
+							</select-by-label>
+					</label>
+				</div>
+			</div>
+
+			<!-- HP and other uneditables -->
+			<div class="row" *ngIf="character.stage>STAGE.Details">
+				<div class="col-3 text-center">
+					<label>HP:
+						<span class="label"><strong>{{character.hitPoints}}</strong></span>
+					</label>
+				</div>
+				<div class="col-3 text-center">
+					<label>XP:
+						<span class="label"><strong>{{character.experiencePoints}}</strong></span>
+					</label>
+				</div>
+				<div class="col-3 text-center">
+					<label>Level:
+						<span class="label"><strong>{{character.level}}</strong></span>
+					</label>
+				</div>
+				<div class="col-3 text-center">
+					<label>Gold:
+						<span class="label"><strong>{{character.gold | number:'1.0-2' }}</strong></span>
+					</label>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+

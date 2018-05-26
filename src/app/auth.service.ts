@@ -5,6 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 
 import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs';
 
 import { environment } from '../environments/environment';
 
@@ -37,7 +38,7 @@ export class AuthService {
 
   constructor(private firebaseAuth: AngularFireAuth, router: Router) {
 
-		this.user = !environment.offline ? firebaseAuth.authState : Observable.of(this._offlineUser);
+		this.user = !environment.offline ? firebaseAuth.authState : of(this._offlineUser);
 		this._isGm$ = this.user.map(user=> { return this.isUserGm(user) });
 		this._isLoggedIn$ = this.user.map(user=> { return user ? true : false });
 		this.user.subscribe(user => {

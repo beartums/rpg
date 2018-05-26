@@ -161,6 +161,12 @@
 					</ng-container>
 				</div>
 			</ng-container>
+			<monster-lookup *ngIf="tab=='monsters'" [searchProperty]="'name'" [items]="gmds.monsters"
+											[(selected)]="monster">
+			</monster-lookup>
+			<edit-monster *ngIf="tab=='monsters' && monster" [monster]="monster">
+			</edit-monster>
+				
 		</div>
 	</div>
 </div>

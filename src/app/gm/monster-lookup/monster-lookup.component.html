@@ -1,0 +1,4 @@
+<span *ngIf="shoulddisplayisloading" class="fa fa-spin fa-spinner"></span>
+<input class="form-control form-control-sm" (selectItem)="onChange($event)"
+		[(ngModel)]="selectedItem" [ngbTypeahead]="search" (focus)="onFocus($event)"
+		[resultFormatter]="formatMatches" [inputFormatter]="formatMatches">

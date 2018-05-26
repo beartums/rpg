@@ -2,8 +2,11 @@
   "rules": {
     ".read": "auth != null",
     ".write": "auth != null",
-		"Characters": {
-			".indexOn": ["currentGame","userId"]
-		}
+      "Characters": {
+        ".indexOn": ["userId","currentGame"]
+      },
+      "Monsters": {
+        ".indexOn": ["name"]
+      }
   }
 }

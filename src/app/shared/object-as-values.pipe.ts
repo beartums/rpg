@@ -6,8 +6,11 @@ export class ObjectAsValuesPipe implements PipeTransform {
 /**
  * Tranform a passed object into an array of objects
  * @param  {any}       transformObj This is the object to be transformed into an array
- * @param  {string ="key"}       keyName   Each key in the original object will become a property in the resulting child object and its property name will be keyName
- * @param  {string = 'value'}     valueName If the element is a primative, it will be given this property name in the resulting object
+ * @param  {string ="key"}       keyName   Each key in the original object will 
+								become a property in the resulting child object and its property 
+								name will be keyName
+ * @param  {string = 'value'}     valueName If the element is a primative, it 
+									will be given this property name in the resulting object
  * @return {Object[]}  Array of objects
  */
     transform(transformObj: any, keyName: string = "key", valueName: string = 'value'): Object[] {

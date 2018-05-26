@@ -30,7 +30,7 @@ import { AppRoutingModule } from './app-routing.module';
 									AngularFireAuthModule, AngularFireDatabaseModule, AppRoutingModule, GmModule, 
 									PlayerModule, SharedModule ],
   declarations: [ AppComponent, 
-									AuthComponent 
+									AuthComponent
 							],
   bootstrap:    [ AppComponent ],
 	providers: [ AuthService, DataService, CharacterService ],

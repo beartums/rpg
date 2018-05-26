@@ -1,0 +1,77 @@
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-5">
+				<h5>Attributes</h5>
+			</div>
+			<!-- ATTRIBUTE TOOLBAR -->
+			<div class="col-7 text-right">
+				<span *ngIf="character.attributeRolls < allowedRolls">
+					&nbsp; Remaining Rolls: {{allowedRolls-character.attributeRolls}}
+				</span>
+				<span class="btn-group btn-group-sm">
+					<button type="button" class="btn btn-default" 
+						(click)="generateAttributes(character)" 
+						*ngIf="character.attributeRolls < allowedRolls"
+						[disabled]="character.stage!=STAGE.Attributes || !character ">
+						<span class="fa fa-magic"></span>
+					</button>
+					<button type="button" class="btn btn-default" (click)="toggleAttributeStage(character)" 
+						[disabled]="character.stage>STAGE.Details">
+						<span class="fa" [ngClass]="{'fa-lock': character.stage!=STAGE.Attributes, 'fa-unlock': character.stage==STAGE.Attributes}">
+						</span>
+					</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="card-body" style="padding-top:0px; padding-bottom:0px;">
+		<div class="row">
+			<!--Attributes-->
+			<div class="col-md-12" *ngIf="character.stage==STAGE.Attributes">
+				<!--  VERTICAL NON-TABLE ATTRIBUTES Displayed when working on attributes-->
+				<div class="row"									
+							*ngFor="let attribute of character.attributes; let i=index">
+					<div class="col-md-3 text-right">{{attribute.key}}: </div>
+					<div class="col-md-2 text-justify">
+						<span class="badge" 
+							(dragstart)='dragStart($event)' [draggable]='character.stage==STAGE.Attributes'
+							(dragover)='allowDrop($event)' (drop)='drop($event)'
+							[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
+							(click)="selectIndex(i,character)" [id]="attribute.key">
+							<span *ngIf="attribute.value<10">&nbsp;
+							</span>
+							{{+attribute.value}}
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12" *ngIf="character.stage!=STAGE.Attributes">
+				<!-- HORIZONTAL TABLE -- displayed when attributes locked 
+																	(too slow for drag and drop) -->
+				
+					<div class="row">
+						<div class="col-2 text-center" *ngFor="let attribute of character.attributes">
+							<strong>{{attribute.key}}</strong>
+						</div>
+					</div>
+					<div class="row" style="padding-bottom:5px;">
+						<div class="col-2 text-center" 
+									*ngFor="let attribute of character.attributes; let i=index">
+							<span class="badge" 
+								(dragstart)='dragStart($event)' [draggable]='character.stage==STAGE.Attributes'
+								(dragover)='allowDrop($event)' (drop)='drop($event)'
+								[ngClass]="selectedIndex == i ? 'badge-success' : 'badge-default'" 
+								(click)="selectIndex(i)" [id]="attribute.key">
+								<span *ngIf="attribute.value<10">&nbsp;
+								</span>
+								{{attribute.value}}
+							</span>
+
+						</div>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+

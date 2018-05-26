@@ -7,12 +7,15 @@ import { Character, STAGE } from '../../character.class';
 import { CharacterService } from '../../character.service';
 
 export class CharacterListButton {
-	title: string;
-	iconClass: string;
-	buttonClass: string;
-	isHidden?: (character: Character) => boolean;
-	isGone?: (character: Character) => boolean;
-	callback: (event: Event, character: Character) => boolean;
+	title: string;					// Title text for mouseover
+	iconClass: string;			// class to define the icon used to decorate the button
+	buttonClass: string;		// ClAss for the button
+	// Function (bound to context) where true means don't display
+	isHidden?: (character: Character) => boolean;		
+	// Function (bound to context) where true means don't render
+	isGone?: (character: Character) => boolean;			
+	// Function (bound to context) wwhich executes the button function
+	callback: (event: Event, character: Character) => boolean; 
 	
 	constructor(callback,iconClass,title, buttonClass) {
 		this.callback = callback;

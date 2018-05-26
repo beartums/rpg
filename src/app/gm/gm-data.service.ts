@@ -23,7 +23,10 @@ import { ATTRIBUTES, RACES, CLASSES, XP_ADJUSTMENTS, SPELLS, CLASS_GROUP_XREF,
 				SAVING_THROW_NAMES, SAVING_THROWS, ATTRIBUTE_ABILITY_MODIFIERS_XREF, 
 				ATTRIBUTE_ABILITY_MODIFIERS, LANGUAGE_PROFICIENCY, ATTACK_TABLES,
 				CURRENCY_VALUES } from  '../data/constants';
+
+import { MONSTERS } from '../data/monsters';
 import { Game, GameOptions } from '../game.class';
+import { Monster } from '../monster.class';
 import { Roll } from '../shared/roll';
 import { Character, Attribute, SavingThrowDetail } from '../character.class';
 
@@ -31,36 +34,43 @@ import { Character, Attribute, SavingThrowDetail } from '../character.class';
 export class GmDataService {
 	
 	uid$: BehaviorSubject<string|null>;
-	games$;
-	users$;
+	
+	monsters$;
+	monsters;
+	monstersRef;
+	
 	gamesRef;
+	games$;
+	
 	usersRef;
+	users$;
+	
 	charactersRef;
 
   constructor(private authService: AuthService, private db: AngularFireDatabase) {
 		this.usersRef = db.list('/Users');
 		this.gamesRef = db.list('/Games');
+		this.monstersRef = db.list('/Reference/Monsters');
 		this.charactersRef = db.list('/Characters');
 		//this.usersRef.subscribe
 		this.games$ = this.gamesRef.snapshotChanges().map(changes => {
       return changes.map(c => ({ key: c.payload.key, ...c.payload.val() }));
     });
+		this.monsters$ = this.monstersRef.snapshotChanges().map(changes => {
+      return changes.map(c => ({ key: c.payload.key, ...c.payload.val() }));
+    });
+		this.monsters$.subscribe( monsters => this.monsters = monsters );
+		
 		this.users$ = this.usersRef.snapshotChanges().map(changes => {
       return changes.map(c => {
 				let usr = { key: c.payload.key, ...c.payload.val() };
-				usr.characters = ['pepe','papa'];
 				return usr;
 			});
 		});
-		//let usersSubscription = this.users$.subscribe(users => {
-		//	this.moveCharacters(users, usersSubscription);
-		//});
-		/**
-		this.uid$ = new BehaviorSubject(authService.userId)
-		this.games$ = this.uid$.switchMap(uid =>
-					db.list('/Games', ref => ref.equalTo(uid)).valueChanges()
-		)
-		*/
+	}
+	
+	addMonster(monster) {
+		this.monstersRef.push(monster);
 	}
 	
 	getCharacters(userList, subscription) {
@@ -107,6 +117,12 @@ export class GmDataService {
 	getCharacterRef(id) {
 		return this.db.object('/Characters/' + id);
 	}
+	
+	getFileMonsters() {
+		return MONSTERS;
+	}
+	
+	
 	fetchCharacter$(id) {
 		return this.getTransformedSnapshotChanges(this.getCharacterRef(id))
 	}
@@ -150,6 +166,23 @@ export class GmDataService {
 		return this.db.list('/Users').snapshotChanges().map(changes => {
 			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
 		});
+	}
+	
+	generateXp(monster: Monster) {
+		let xp = 0;
+		if (monster.xp) return xp;
+		//xp += monster.hd + 55;
+		//xp += monster.specialAttacks ? monster.specialAttacks * 35 : 0;
+		return xp;
+	}
+	
+	removeMonster(key?) {
+		this.monstersRef.remove(key);
+	}
+	updateMonster(key:string,monster:Monster) {
+		let uMon = _.cloneDeep(monster);
+		delete uMon.key;
+		this.monstersRef.update(key,uMon);
 	}
 	
 	saveCharacter(character) {

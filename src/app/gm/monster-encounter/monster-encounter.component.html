@@ -1,0 +1,9 @@
+<div class="container">
+	
+	<button class="btn btn-primary" (click)="uploadMonsters()">
+		<span *ngIf="monsterUploadInProgess" class="fa fa-spin fa-spinner"></span>
+		<span *ngIf="!monsterUploadInProgess" class="ra ra-dragon ra-underhand"></span>
+	</button>
+	<br />
+	<span *ngIf="monsterCount">uploading... {{ monsterCount }} ({{ monster.name }})</span>
+</div>
