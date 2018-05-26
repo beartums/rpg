@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AngularSplitModule } from 'angular-split';
+
 
 import { SelectByLabelComponent }  from './select-by-label.component';
 
@@ -17,19 +19,20 @@ import { CharacterListComponent } from './character-list/character-list.componen
 
 @NgModule({
   imports: [
-    CommonModule, FormsModule, NgbModule
+    CommonModule, FormsModule, NgbModule,
+    AngularSplitModule
   ],
-  declarations: [	SelectByLabelComponent, 
-									ModifierPipe, 
-									CaseConvertPipe, 
-									ObjectAsValuesPipe, NotesListComponent, ClickToEditComponent, DisplayTableComponent, SelectGearComponent, CharacterListComponent
+  declarations: [	SelectByLabelComponent,
+									ModifierPipe,
+									CaseConvertPipe,
+                  ObjectAsValuesPipe, NotesListComponent, ClickToEditComponent, DisplayTableComponent, SelectGearComponent, CharacterListComponent
 	],
-	exports: [		SelectByLabelComponent, 
-									ModifierPipe, 
-									CaseConvertPipe, 
-									ObjectAsValuesPipe, 
+	exports: [		SelectByLabelComponent,
+									ModifierPipe,
+									CaseConvertPipe,
+									ObjectAsValuesPipe,
 									ClickToEditComponent, NotesListComponent, DisplayTableComponent, SelectGearComponent,
-									CharacterListComponent
+									CharacterListComponent, AngularSplitModule
 	],
 	providers: [ CaseConvertPipe ]
 })
