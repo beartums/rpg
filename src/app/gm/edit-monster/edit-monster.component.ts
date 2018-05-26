@@ -13,16 +13,16 @@ export class EditMonsterComponent implements OnInit {
 
 	@Input() monster: Monster;
 	@Output() monsterChanges: EventEmitter<Monster> = new EventEmitter();
-	
+
 	@Input() isInstance: boolean = false;
-	
+
 	_monster: Monster;
 
   constructor(private gmds: GmDataService) { }
 
   ngOnInit() {
   }
-	
+
 	ngOnChanges(changes: SimpleChanges) {
 		for (let prop in changes) {
 			if (prop=='monster') {
@@ -31,8 +31,11 @@ export class EditMonsterComponent implements OnInit {
 			}
 		}
 	}
-	
-	isChanged() {
+
+  /**
+   *
+   */
+	isChanged(): boolean {
 		return !_.isEqual(this.monster,this._monster);
 	}
 	save(monster: Monster) {
