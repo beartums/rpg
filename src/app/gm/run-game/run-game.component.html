@@ -1,153 +1,225 @@
-<div class="container" *ngIf="game$ | async as game; else loading">
-    <div class="row align-items-center">
-        <div class="col-6">
-            <h2>{{game.name}}</h2>
-        </div>
-        <div class="col-1 text-right">
-            Status:
-        </div>
-        <div class="col-2 text-left">
-            <span>
-				<select class="form-control form-control-sm" [(ngModel)]="game.gameStatus"
-					(change)="changeGameStatus(game)">
-					<option *ngFor="let stat of getStatuses()" [ngValue]="GAME_STATUS[stat]">
+<div class="container"
+		 *ngIf="game$ | async as game; else loading">
+	<div class="row align-items-center">
+		<div class="col-6">
+			<h2>{{game.name}}</h2>
+		</div>
+		<div class="col-1 text-right">
+			Status:
+		</div>
+		<div class="col-2 text-left">
+			<span>
+				<select class="form-control form-control-sm"
+								[(ngModel)]="game.gameStatus"
+								(change)="changeGameStatus(game)">
+					<option *ngFor="let stat of getStatuses()"
+									[ngValue]="GAME_STATUS[stat]">
 						{{stat}}
 					</option>
 				</select>
 			</span>
-        </div>
-        <div class="col-3">
-            <div class="btn-toolbar btn-toolbar-sm">
-                <div class="btn-group btn-group-sm ml-auto">
-                    <button type="button" class="btn btn-default btn-sm" title="Create and add a new character" (click)="newCharacter()">
+		</div>
+		<div class="col-3">
+			<div class="btn-toolbar btn-toolbar-sm">
+				<div class="btn-group btn-group-sm ml-auto">
+					<button type="button"
+									class="btn btn-default btn-sm"
+									title="Create and add a new character"
+									(click)="newCharacter()">
 						<span class="fa fa-user-plus"></span>
 					</button>
-                    <button type="button" class="btn btn-default btn-sm" title="Find a current character and add to this game" (click)="findExistingCharacter()">
+					<button type="button"
+									class="btn btn-default btn-sm"
+									title="Find a current character and add to this game"
+									(click)="addExistingCharacter()">
 						<span class="fa fa-search"></span>
 					</button>
-                </div>
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-default btn-sm ml-2" [disabled]="!selectedCharacter" title="Boot this character from the game" (click)="ejectCharacter(selectedCharacter)">
+				</div>
+				<div class="btn-group btn-group-sm">
+					<button type="button"
+									class="btn btn-default btn-sm ml-2"
+									[disabled]="!selectedCharacter"
+									title="Boot this character from the game"
+									(click)="ejectCharacter(selectedCharacter)">
 						<span class="fa fa-trash"></span>
 					</button>
-                    <button type="button" class="btn btn-default btn-sm" [disabled]="!selectedCharacter" title="Boot AND PERMANENTLY DELETE this character" (click)="destroyCharacter(selectedCharacter)">
+					<button type="button"
+									class="btn btn-default btn-sm"
+									[disabled]="!selectedCharacter"
+									title="Boot AND PERMANENTLY DELETE this character"
+									(click)="destroyCharacter(selectedCharacter)">
 						<span class="fa fa-bomb"></span>
 					</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <split direction="horizontal" (dragProgress)="characterList.resize()">
-                <split-area size="30">
-                </split-area>
-                <split-area size="70">
-                    <character-list #characterList [characters]="(characters$ | async)" [(selectedCharacter)]="selectedCharacter">
-                    </character-list>
-                </split-area>
-            </split>
-        </div>
-    </div>
-    <div class="row" *ngIf="addingExistingCharacter">
-        <div class="col-4">
-            <div class="input-group input-group-sm" *ngIf="addingExistingCharacter">
-                <div class="input-group input-group-sm" *ngIf="existingCharacters$ | async as existingCharacters; else loading">
-                    <select class="form-control form-control-sm" [(ngModel)]="existingCharacterId" (change)="selectExistingCharacter($event)">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<split direction="horizontal"
+						 (dragProgress)="characterList.resize()"
+						 (dragEnd)="characterList.resize()">
+				<split-area size="0">
+				</split-area>
+				<split-area size="100">
+					<character-list #characterList
+													[characters]="(characters$ | async)"
+													[(selectedCharacter)]="selectedCharacter"
+													minWidth="600">
+					</character-list>
+				</split-area>
+			</split>
+		</div>
+	</div>
+	<div class="row" *ngIf="addingExistingCharacter">
+		<div class="col-4">
+			<div class="input-group input-group-sm" *ngIf="addingExistingCharacter">
+				<div class="input-group input-group-sm"				            *ngIf="existingCharacters$ | async as existingCharacters; else loading">
+					<select class="form-control form-control-sm"
+									[(ngModel)]="existingCharacterId"
+									(change)="selectExistingCharacter($event)">
 						<option *ngFor="let char of existingCharacters"
 										[ngValue]="char.key">
 							{{char.name}}
 						</option>
 					</select>
-                    <div class="input-group-append" (click)="addingExistingCharacter = false">
-                        <button class="btn btn-default btn-sm">
+					<div class="input-group-append"
+							 (click)="addingExistingCharacter = false">
+						<button class="btn btn-default btn-sm">
 							<span class="fa  fa-times"></span>
 						</button>
-                    </div>
-                </div>
-            </div>
-            <br />
-        </div>
-    </div>
+					</div>
+				</div>
+			</div>
+			<br />
+		</div>
+	</div>
 
-    <div class="row">
-        <div class="col-2 text-left">
-            <div class='btn-group-vertical'>
-                <button class='btn mb-2' [ngClass]="tab=='notes' ? 'btn-info': 'btn-light'" (click)="tab='notes'">
+  <!--
+    GM Tools -- character editing, Notes, monsters, charts
+  -->
+	<div class="row">
+    <!-- Buttons to select tools-->
+		<div class="col-2 text-left">
+			<div class='btn-group-vertical'>
+				<button class='btn mb-2'
+								[ngClass]="tab=='notes' ? 'btn-info': 'btn-light'"
+								(click)="tab='notes'">
 					Game Notes
 				</button>
-                <button class='btn mb-2' [ngClass]="tab=='character' ? 'btn-info': 'btn-light'" (click)="tab='character'">
+				<button class='btn mb-2'
+								[ngClass]="tab=='character' ? 'btn-info': 'btn-light'"
+								(click)="tab='character'">
 					Character
 				</button>
-                <button class='btn mb-2' [ngClass]="tab=='charts' ? 'btn-info': 'btn-light'" (click)="tab='charts'">
+				<button class='btn mb-2'
+								[ngClass]="tab=='charts' ? 'btn-info': 'btn-light'"
+								(click)="tab='charts'">
 					Charts
 				</button>
-                <button class='btn mb-2' [ngClass]="tab=='booty' ? 'btn-info': 'btn-light'" (click)="tab='booty'">
+				<button class='btn mb-2'
+								[ngClass]="tab=='booty' ? 'btn-info': 'btn-light'"
+								(click)="tab='booty'">
 					Booty
 				</button>
-                <button class='btn mb-2' [ngClass]="tab=='monsters' ? 'btn-info': 'btn-light'" (click)="tab='monsters'">
+				<button class='btn mb-2'
+								[ngClass]="tab=='monsters' ? 'btn-info': 'btn-light'"
+								(click)="tab='monsters'">
 					Monsters
 				</button>
-            </div>
-        </div>
-        <div class="col-10">
-            <notes-list *ngIf="tab=='notes'" [notes]="game.notes" (notesChange)="saveNotes($event, game)" [isGm]="true">
-            </notes-list>
-            <ng-container *ngIf="tab=='character' && selectedCharacter">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="btn-group btn-group-sm">
-                            <button class='btn btn-sm mr-2' [ngClass]="subtab=='details' ? 'btn-info': 'btn-light'" (click)="subtab='details'">
+			</div>
+    </div>
+    <!-- Tools -->
+		<div class="col-10">
+      <!-- Notes -->
+			<notes-list *ngIf="tab=='notes'"
+									[notes]="game.notes"
+									(notesChange)="saveNotes($event, game)"
+									[isGm]="true">
+      </notes-list>
+      <!-- Character -->
+			<ng-container *ngIf="tab=='character' && selectedCharacter">
+				<div class="row">
+					<div class="col-6">
+						<div class="btn-group btn-group-sm">
+							<button class='btn btn-sm mr-2'
+											[ngClass]="subtab=='details' ? 'btn-info': 'btn-light'"
+											(click)="subtab='details'">
 								Details
 							</button>
-                            <button class='btn btn-sm mr-2' [ngClass]="subtab=='equipment' ? 'btn-info': 'btn-light'" (click)="subtab = 'equipment'">
+							<button class='btn btn-sm mr-2'
+											[ngClass]="subtab=='equipment' ? 'btn-info': 'btn-light'"
+											(click)="subtab = 'equipment'">
 								Equipment
 							</button>
-                        </div>
-                    </div>
-                    <div class="col-6 text-right" *ngIf="subtab=='equipment'">
-                        <span class="btn-group btn-group-sm">
+						</div>
+          </div>
+          <!-- Character subtab selection -->
+					<div class="col-6 text-right"
+							 *ngIf="subtab=='equipment'">
+						<span class="btn-group btn-group-sm">
 							<span class="btn btn-sm"
 										[ngClass]="equipmentMode!='cart' ? 'text-warning btn-info' : ''"
 										(click)="equipmentMode='character'">
-								<span class='ra ra-gold-bar' title="Selling Equipment">
+								<span class='ra ra-gold-bar'
+											title="Selling Equipment">
 								</span> Sell
-                        </span>
-                        <span class="btn btn-sm" [ngClass]="equipmentMode=='cart' ? 'btn-info' : ''" (click)="equipmentMode='cart'">
-								<span class='fa fa-shopping-cart' title="Buying Equipment">
+							</span>
+							<span class="btn btn-sm"
+										[ngClass]="equipmentMode=='cart' ? 'btn-info' : ''"
+										(click)="equipmentMode='cart'">
+								<span class='fa fa-shopping-cart'
+											title="Buying Equipment">
 								</span> Buy
-                        </span>
-                        </span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12" *ngIf="subtab=='details'">
-                        <edit-character [(character)]="selectedCharacter" [(characterKey)]="selectedCharacterKey">
-                        </edit-character>
-                    </div>
-                    <ng-container *ngIf="subtab=='equipment'">
-                        <div [ngClass]="equipmentMode!='cart' ? 'col-12' : 'd-none'">
-                            <select-gear [(sourceEquipment)]="selectedCharacter.equipment" [allowAll]="true" [(sourceGold)]="selectedCharacter.gold" (onTransactionCompleted)="updateCharacter(selectedCharacter)">
-                            </select-gear>
-                        </div>
-                        <div [ngClass]="equipmentMode=='cart' ? 'col-12' : 'd-none'">
-                            <select-gear [(targetGold)]="selectedCharacter.gold" [(targetEquipment)]="selectedCharacter.equipment" (onTransactionCompleted)="updateCharacter(selectedCharacter)">
-                            </select-gear>
-                        </div>
-                    </ng-container>
-                </div>
-            </ng-container>
-            <monster-lookup *ngIf="tab=='monsters'" [searchProperty]="'name'" [items]="gmds.monsters" [(selected)]="monster">
-            </monster-lookup>
-            <edit-monster *ngIf="tab=='monsters' && monster" [monster]="monster">
-            </edit-monster>
-
+							</span>
+						</span>
+					</div>
         </div>
-    </div>
+        <div class="row">
+          <!-- Character Details -->
+          <div class="col-12"
+							 *ngIf="subtab=='details'">
+						<edit-character [(character)]="selectedCharacter"
+														[(characterKey)]="selectedCharacterKey">
+						</edit-character>
+          </div>
+          <!-- Character Equipment (buying) -->
+					<ng-container *ngIf="subtab=='equipment'">
+						<div [ngClass]="equipmentMode!='cart' ? 'col-12' : 'd-none'">
+							<select-gear [(sourceEquipment)]="selectedCharacter.equipment"
+													 [allowAll]="true"
+													 [(sourceGold)]="selectedCharacter.gold"
+													 (onTransactionCompleted)="updateCharacter(selectedCharacter)">
+							</select-gear>
+            </div>
+            <!-- Character Equipment (selling) -->
+						<div [ngClass]="equipmentMode=='cart' ? 'col-12' : 'd-none'">
+							<select-gear [(targetGold)]="selectedCharacter.gold"
+													 [(targetEquipment)]="selectedCharacter.equipment"
+													 (onTransactionCompleted)="updateCharacter(selectedCharacter)">
+							</select-gear>
+						</div>
+					</ng-container>
+				</div>
+      </ng-container>
+      <!-- Monster Maintenance/lookup-->
+			<monster-lookup *ngIf="tab=='monsters'"
+											[searchProperty]="'name'"
+											[items]="gmds.monsters"
+											[(selected)]="monster">
+			</monster-lookup>
+			<edit-monster *ngIf="tab==='monsters' && monster"
+										[monster]="monster">
+			</edit-monster>
+
+		</div>
+	</div>
 </div>
 <ng-template #loadingTableRow>
-    <tr><span class="fa fa-spin fa-spinner"></span></tr>
+	<tr>
+		<span class="fa fa-spin fa-spinner"></span>
+	</tr>
 </ng-template>
 <ng-template #loading>
-    <span class="fa fa-spin fa-spinner"></span>
+	<span class="fa fa-spin fa-spinner"></span>
 </ng-template>

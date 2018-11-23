@@ -10,8 +10,19 @@ import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 })
 export class MonsterLookupComponent implements OnInit {
 
-	@Input() items: any[];
-	@Input() searchProperty: string = 'name'
+  /**
+   * Items to search
+   * @type {any[]}
+   * @memberOf MonsterLookupComponent
+   */
+  @Input() items: any[];
+  /**
+   * The name of the property in the Items to match
+   * @type {string}
+   * @memberOf MonsterLookupComponent
+   */
+  @Input() searchProperty: string = 'name'
+  @Input() maxMatches: number = 10
 	@Input() selected: any;
 	@Output() selectedChange: EventEmitter<any> = new EventEmitter();
 	

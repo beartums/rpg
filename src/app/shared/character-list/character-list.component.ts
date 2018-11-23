@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, OnChanges,
         EventEmitter, SimpleChanges, HostListener, ViewChild,
-      ChangeDetectorRef } from '@angular/core';
+      ChangeDetectorRef, HostBinding } from '@angular/core';
 
 import * as _ from 'lodash';
 
@@ -40,7 +40,11 @@ export class CharacterListComponent implements OnInit, OnDestroy, OnChanges {
 
 	@Input() buttons: CharacterListButton[]=[];
 
-	@Input() allowSelect: boolean = true;
+  @Input() allowSelect: boolean = true;
+
+  @Input() minWidth: number = 400;
+
+  //@Output() allowDragging:
 
 	selectedCharacterKey: string;		// determine equivalence when character is updated from firebase
 	showArmoredAc: boolean = true;
@@ -57,6 +61,8 @@ export class CharacterListComponent implements OnInit, OnDestroy, OnChanges {
     lg: {min: 1280, max: 1919},
     xl: {min: 1920},
   }
+
+  @HostBinding('style.width.px') hostWidth: number = 600;
 
   constructor(private cs: CharacterService, private cdRef: ChangeDetectorRef) { }
 
@@ -84,6 +90,10 @@ export class CharacterListComponent implements OnInit, OnDestroy, OnChanges {
   //  this.cdRef.markForCheck();
   }
   getSize() {
+    let newWidth = this.listTable.nativeElement.clientWidth;
+    if (newWidth<+this.minWidth && newWidth<=this.width) {
+      this.listTable.nativeElement.setAttribute('width',this.minWidth + 'px');
+    }
     this.width = this.listTable.nativeElement.clientWidth;
     this.height = this.listTable.nativeElement.clientHeight;
     this.size = this.setSize(this.width);

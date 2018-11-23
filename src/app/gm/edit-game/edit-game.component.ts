@@ -21,9 +21,9 @@ export class EditGameComponent implements OnInit {
 		edited: null,
 		original: null
 	}
-	
+
   constructor(private route: ActivatedRoute,
-							private gmds: GmDataService, 
+							private gmds: GmDataService,
 							private router:Router) { }
 
   ngOnInit() {
@@ -32,22 +32,22 @@ export class EditGameComponent implements OnInit {
 			this.game$ = this.gmds.fetchGame$(this.key);
 			this.game$.subscribe((game: Game) => {
 				this.resetGame(game);
-				this.characters$ = this.gmds.fetchCharactersAndPlayers(game);
+				this.characters$ = this.gmds.fetchCharactersAndPlayers$(game);
 			});
 		});
   }
-	
+
 	saveChanges(gameChanges, game) {
 		Object.assign(game,gameChanges);
 		this.gmds.updateGame(this.key,game);
-		this.game = { 
+		this.game = {
 			edited: null,
 			original: null
 		};
 		this.router.navigate(['manage-games']);
 	}
 	cancelChanges() {
-		this.game = { 
+		this.game = {
 			edited: null,
 			original: null
 		};

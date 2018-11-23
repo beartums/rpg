@@ -12,7 +12,7 @@ export class MonsterEncounterComponent implements OnInit {
 	totalMonsters: number;
 	monsterUploadInProgress: boolean = false;
 	monster: any;
-	
+
   constructor(private gmds: GmDataService) { }
 
   ngOnInit() {
@@ -20,16 +20,16 @@ export class MonsterEncounterComponent implements OnInit {
 	uploadMonsters() {
 		this.monsterUploadInProgress = true;
 		let monsters = this.gmds.getFileMonsters();
-		this.gmds.removeMonster();
+		this.gmds.deleteMonster();
 		this.monsterCount = 0;
 		this.totalMonsters = monsters.length;
-		
+
 		monsters.forEach( monster => {
 			this.monster = monster;
 			this.monsterCount++
 			this.gmds.addMonster(monster);
 		});
-		
+
 		this.monsterUploadInProgress = false;
 	}
 

@@ -1,3 +1,5 @@
+// import { Character } from './../character.class';
+//import { Monster } from './../game.class';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -19,8 +21,8 @@ import * as _ from 'lodash';
 import { AuthService } from '../auth.service';
 import { AngularFireDatabase } from 'angularfire2/database';
 
-import { ATTRIBUTES, RACES, CLASSES, XP_ADJUSTMENTS, SPELLS, CLASS_GROUP_XREF, 
-				SAVING_THROW_NAMES, SAVING_THROWS, ATTRIBUTE_ABILITY_MODIFIERS_XREF, 
+import { ATTRIBUTES, RACES, CLASSES, XP_ADJUSTMENTS, SPELLS, CLASS_GROUP_XREF,
+				SAVING_THROW_NAMES, SAVING_THROWS, ATTRIBUTE_ABILITY_MODIFIERS_XREF,
 				ATTRIBUTE_ABILITY_MODIFIERS, LANGUAGE_PROFICIENCY, ATTACK_TABLES,
 				CURRENCY_VALUES } from  '../data/constants';
 
@@ -29,22 +31,28 @@ import { Game, GameOptions } from '../game.class';
 import { Monster } from '../monster.class';
 import { Roll } from '../shared/roll';
 import { Character, Attribute, SavingThrowDetail } from '../character.class';
+import { User } from 'firebase';
+import { FirebaseDatabase } from '@firebase/database-types';
 
+interface CharacterAndUser {
+  character: Character,
+  user: User
+}
 @Injectable()
 export class GmDataService {
-	
+
 	uid$: BehaviorSubject<string|null>;
-	
+
 	monsters$;
 	monsters;
 	monstersRef;
-	
+
 	gamesRef;
 	games$;
-	
+
 	usersRef;
 	users$;
-	
+
 	charactersRef;
 
   constructor(private authService: AuthService, private db: AngularFireDatabase) {
@@ -60,7 +68,7 @@ export class GmDataService {
       return changes.map(c => ({ key: c.payload.key, ...c.payload.val() }));
     });
 		this.monsters$.subscribe( monsters => this.monsters = monsters );
-		
+
 		this.users$ = this.usersRef.snapshotChanges().map(changes => {
       return changes.map(c => {
 				let usr = { key: c.payload.key, ...c.payload.val() };
@@ -68,29 +76,48 @@ export class GmDataService {
 			});
 		});
 	}
-	
-	addMonster(monster) {
-		this.monstersRef.push(monster);
+
+	onDestroy() {
+		//this.games$.unsubscribe();
 	}
-	
-	getCharacters(userList, subscription) {
-		userList.forEach(user => {
-			user.Character.userId = user.key;
-			let characterRef = this.charactersRef.push(user.Character);
-			user.characterIds = [];
-			user.characterIds.push(characterRef.key);
-			this.usersRef.update(user.key,{key: null, characterIds: user.characterIds});
-		});
-		subscription.unsubscribe();
+
+  addCharacter(character: Character): Character {
+		let whatisit = this.charactersRef.push(character);
+		return whatisit;
 	}
-	
+
 	addGame(game: Game): Game {
 		game.dmUserId = this.authService.userId;
 		let gameRef = this.gamesRef.push(game);
 		return game;
 	}
-	
-	fetchCharactersAndPlayers(game) {
+
+	addMonster(monster) {
+		this.monstersRef.push(monster);
+	}
+
+  deleteCharacter(key:string) {
+		this.charactersRef.remove(key)
+	}
+
+	deleteGame(key: string): FirebaseDatabase {
+		let gameRef = this.gamesRef.remove(key);
+		return gameRef;
+	}
+
+  deleteMonster(key?) {
+		this.monstersRef.remove(key);
+  }
+
+  /**
+   * Fetch the characters in the game (and their players)
+   *
+   * @param {Game} game Game for which to fetch characters
+   * @returns Oservable array of CharactersAndUsers
+   *
+   * @memberOf GmDataService
+   */
+  fetchCharactersAndPlayers$(game: Game): Observable<CharacterAndUser[]> {
 		let characterIds = game.characters;
 		if (characterIds.length>0) {
 			// convert array into a stream of observables
@@ -107,43 +134,47 @@ export class GmDataService {
 				.toArray();
 		}
 	}
-	
-	getAllCharacters$() {
-		return this.charactersRef.snapshotChanges().map(changes => {
-			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
-		});
-	}
-	
-	getCharacterRef(id) {
-		return this.db.object('/Characters/' + id);
-	}
-	
-	getFileMonsters() {
-		return MONSTERS;
-	}
-	
-	
-	fetchCharacter$(id) {
+
+	fetchCharacter$(id): Observable<Character> {
 		return this.getTransformedSnapshotChanges(this.getCharacterRef(id))
 	}
-	
+
 	fetchCharactersByGameId$(key: string): Observable<Character[]> {
 		let characters = this.db.list('/Characters',ref=>ref.orderByChild('currentGame').equalTo(key));
 		return characters.snapshotChanges().map(changes => {
 			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
 		});
 	}
-	
-	fetchUser$(id) {
+
+  fetchGame$(key:string): Observable<Game> {
+		return <Observable<Game>>this.db.object('Games/' + key).valueChanges();
+	}
+
+	fetchPlayers$(): Observable<User[]> {
+		return this.db.list('/Users').snapshotChanges().map(changes => {
+			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
+		});
+	}
+
+	fetchUser$(id): Observable<User> {
 		let a$ = this.db.object('/Users/' + id);
 		return this.getTransformedSnapshotChanges(a$);
 	}
-	
-	removeGame(key) {
-		let gameRef = this.gamesRef.remove(key);
-		return gameRef;
+
+  getAllCharacters$(): Observable<Character[]> {
+		return this.charactersRef.snapshotChanges().map(changes => {
+			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
+		});
 	}
-	
+
+	getCharacterRef(id) {
+		return this.db.object('/Characters/' + id);
+	}
+
+	getFileMonsters() {
+		return MONSTERS;
+	}
+
 	getTransformedSnapshotChanges(object$) {
 		let snapshot = object$.snapshotChanges();
 		let transformed = snapshot.map(changes => {
@@ -151,55 +182,38 @@ export class GmDataService {
 		});
 		return transformed;
 	}
-	
+
+	generateXp(monster: Monster): number {
+		let xp = 0;
+		if (monster.xp) return xp;
+		return xp;
+	}
+
+  /**
+   * Update the character in the online database
+   *
+   * @param {string} key Character key string
+   * @param {Partial<Character>} character Object with 0 or more properties
+   *  from the Character Class
+   *
+   * @memberOf GmDataService
+   */
+  updateCharacter(key: string, character: Partial<Character>) {
+		let uChar = _.cloneDeep(character);
+		delete uChar.key;
+		this.charactersRef.update(key,uChar);
+	}
+
 	updateGame(key: string,game: Game) {
 		let uGame = _.cloneDeep(game)
 		delete uGame.key;
 		let gameRef = this.gamesRef.update(key,uGame)
 	}
 
-	fetchGame$(key:string): Observable<Game> {
-		return <Observable<Game>>this.db.object('Games/' + key).valueChanges();
-	}
-	
-	fetchPlayers$() {
-		return this.db.list('/Users').snapshotChanges().map(changes => {
-			return changes.map( c=> ({ key: c.payload.key, ...c.payload.val() }) );
-		});
-	}
-	
-	generateXp(monster: Monster) {
-		let xp = 0;
-		if (monster.xp) return xp;
-		//xp += monster.hd + 55;
-		//xp += monster.specialAttacks ? monster.specialAttacks * 35 : 0;
-		return xp;
-	}
-	
-	removeMonster(key?) {
-		this.monstersRef.remove(key);
-	}
-	updateMonster(key:string,monster:Monster) {
+	updateMonster(key: string, monster: Monster) {
 		let uMon = _.cloneDeep(monster);
 		delete uMon.key;
 		this.monstersRef.update(key,uMon);
-	}
-	
-	saveCharacter(character) {
-		let whatisit = this.charactersRef.push(character);
-		return whatisit;
-	}
-	
-	updateCharacter(key: string,character) {
-		let uChar = _.cloneDeep(character);
-		delete uChar.key;
-		this.charactersRef.update(key,uChar);
-	}
-	deleteCharacter(key:string) {
-		this.charactersRef.remove(key)
-	}
-		
-	onDestroy() {
-		//this.games$.unsubscribe();
-	}
+  }
+
 }

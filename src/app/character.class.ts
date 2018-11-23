@@ -5,7 +5,7 @@ export enum AlignmentLaw {
 	"Lawful", "Neutral", "Good"
 }
 export enum GAME_STATUS { New, Playing, Paused, Cancelled, Completed }
- 
+
 export enum STAGE { Attributes, Details, Equipment, Spells, Complete }
 
 export enum GEAR_STATUS { InUse, Stowed, Stored }
@@ -27,12 +27,12 @@ export class Character {
 	alignmentGood: string;
 	attributes: Attribute[];
 	equipment;
-	//treasure: Treasure[];
+  //treasure: Treasure[];
 	gold: number = 0;
 	stage: STAGE = STAGE.Attributes;
 	attributeRolls?: number = 0;
 	xpRolls?: number = 0;
-	currentGame: string;
+	currentGame?: string;
 	userId: string;
 	retainedBy: string;
 	notes: Note[];
