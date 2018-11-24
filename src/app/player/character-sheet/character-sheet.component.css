@@ -1,0 +1,16 @@
+.gold {
+  color: goldenrod;
+}
+.healthy {
+  color: maroon;
+}
+.hurt {
+  color: #c18085;
+}
+.hurt-badly {
+  color: #6b4e50;
+}
+.dead {
+  color: #111111;
+  font-size: smaller;
+}

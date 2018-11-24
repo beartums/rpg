@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Character, Attribute, STAGE, Gear } from '../character.class';
 import { CharacterService } from '../character.service';
 import { DataService } from '../data.service';
-import * as _ from 'lodash'; 
+import * as _ from 'lodash';
 
 @Component({
 	selector: 'character-creation',
@@ -21,20 +21,23 @@ export class CharacterCreationComponent implements OnInit {
 	characterKey: string;
 	userId: string;
 	gameKey: string;
-	
+
 	status: any = this.ds.userData.status;
-	
+
 	rollCount: number = 0;
 	allowedRolls: number = 3;
-	
+
 	STAGE = STAGE;
 	JSON = JSON;
-	isNaN = isNaN;
+  isNaN = isNaN;
 
-	constructor(private cs: CharacterService, private ds: DataService,
+  infoRace: string;
+  infoClass: string;
+
+	constructor(public cs: CharacterService, private ds: DataService,
 							private router: Router, private route: ActivatedRoute) {
 	}
-	
+
 	ngOnInit() {
 		this.route.paramMap.subscribe( params => {
 			this.characterKey = params.get('key');
@@ -53,11 +56,11 @@ export class CharacterCreationComponent implements OnInit {
 			}
 		})
 	}
-	
+
 	ngOnDestroy() {
 		//this.subscription.unsubscribe();
 	}
-	
+
 	saveProgress(character) {
 		if (!this.characterKey) {
 			this.characterKey = this.ds.saveCharacter(character);
@@ -66,11 +69,11 @@ export class CharacterCreationComponent implements OnInit {
 			this.ds.updateCharacter(character);
 		}
 	}
-	
+
 	toggleEquipmentStage(character: Character) {
 		if (character.stage > STAGE.Spells ||
 				character.stage < STAGE.Details) return;
-				
+
 		if (character.stage == STAGE.Equipment) {
 			// HACKY: spell progression tables will be null if there are no current spells
 			// for this character
@@ -80,7 +83,7 @@ export class CharacterCreationComponent implements OnInit {
 		}
 		this.saveProgress(character);
 	}
-	
+
 	isIn(a: any[], lookup: any): boolean {
 		if (!a || !a.length) return true;
 		for (let i = 0; i < a.length; i++) {

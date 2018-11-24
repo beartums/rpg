@@ -10,22 +10,22 @@ import { CaseConvertPipe } from './shared/case-convert.pipe';
 @Injectable()
 export class CharacterService {
 
-	constructor(@Inject(DataService) private ds: DataService, 
+	constructor(@Inject(DataService) private ds: DataService,
 							private caseConvert: CaseConvertPipe) {}
-	
+
 	addAdditionalSpells(spellProgressionTable: any, character: Character) {
 		let spt = Object.assign({},spellProgressionTable);
 		let attributeKey = 'WIS'
 		let attributes = this.getAdjustedAttributesByCharacter(character);
 		let attribute = this.getAttributeByAttributeKey(attributeKey,attributes);
-		let additionalSpellsMod = this.getAbilityModByAbility('additionalSpells', 
+		let additionalSpellsMod = this.getAbilityModByAbility('additionalSpells',
 													attribute.key, attribute.value);
 		if (!additionalSpellsMod) return spt;
-		
+
 		let additionalSpells = additionalSpellsMod.value;
 		// Additional spells are ONLY available if Cleric/Druid can memorizze
 		// AT LEAST one spell of that level
-		
+
 		Object.keys(spt).forEach(key => {
 			let level:number = +key;
 			if (spt[level] > 0 && additionalSpells.length >= level) {
@@ -34,7 +34,7 @@ export class CharacterService {
 		});
 		return spt;
 	}
-	
+
 	generateAttributesArray(rollNotation: string='5d6k3'): any[] {
 		let attributes: Attribute[] = [];
 		for (let key in this.ds.Attributes) {
@@ -42,7 +42,7 @@ export class CharacterService {
 		}
 		return attributes;
 	}
-	
+
 	generateEmptyAttributesArray(): Attribute[] {
 		let attributes: Attribute[] = [];
 		for (let key in this.ds.Attributes) {
@@ -83,7 +83,7 @@ export class CharacterService {
 		let name = names[idx];
 		return name;
 	}
-	
+
 	getHalfRace(raceName: string): string {
 		let halfRace: string = raceName.replace('half-','');
 		if (halfRace==raceName) return null;
@@ -118,7 +118,7 @@ export class CharacterService {
 			}
 			return Roll.roll(rollNotation);
 		}
-		
+
 	roll(rollNotation: string): number {
 		return Roll.roll(rollNotation);
 	}
@@ -151,7 +151,7 @@ export class CharacterService {
 		}
 		return {ability: abilityKey, attribute: attributeKey, value: value};
 	}
-	
+
 	getAdjustedAttributesByCharacter(character: Character, reverseAdjustment: boolean = false): Attribute[] {
 		let attributes = this.getAdjustedAttributes(character.attributes,
 												character.raceName, character.className, reverseAdjustment);
@@ -177,36 +177,37 @@ export class CharacterService {
 		}
 		return adjustedAttributes;
 	}
-	
+
 	getAlignments(prop?: string): any {
 		return this.ds.getAlignments(prop);
 	}
-	
+
 	getArmorClassAbilityMod(character: Character): number {
 		let attributes = this.getAdjustedAttributesByCharacter(character);
 		let dex = this.getAttributeByAttributeKey('DEX',attributes);
 		let mod = this.getAbilityModByAbility('armorClass',dex.key,dex.value);
 		return mod.value;
 	}
-	
+
 	getRawArmorClass(character: Character): number {
 		let ac = this.ds.getBaseArmorClass();
 		let mod = this.getArmorClassAbilityMod(character);
 		return ac + mod;
 	}
-		
+
 	getArmoredArmorClass(character: Character): number {
 		if (!character.equipment || !character.equipment.filter) return this.getRawArmorClass(character);
 		let gear = character.equipment;
-		let armor = gear.filter(item=>item.type=='Armor');
+    let armor = gear.filter(item=>item.type=='Armor');
+    armor = armor.filter(item=>item.status==GEAR_STATUS.InUse);
 		let baseAc = armor.reduce((ac,item:Armor)=> {
 					//if (item.status != GEAR_STATUS.InUse || !item.armorClass) return ac;
 					if (!item.armorClass) return ac;
-					return item.armorClass<ac ? item.armorClass : ac 
+					return item.armorClass<ac ? item.armorClass : ac
 				},this.ds.getBaseArmorClass());
 		let armorMods = armor.reduce((mod,item:Armor)=> {
 					if (item.status != GEAR_STATUS.InUse || !item.armorClassMod) return mod;
-					return item.armorClassMod ? mod + item.armorClassMod : mod 
+					return item.armorClassMod ? mod + item.armorClassMod : mod
 				}, 0);
 		let abilityMod = this.getArmorClassAbilityMod(character);
 		let ac = +baseAc + armorMods + abilityMod;
@@ -219,11 +220,11 @@ export class CharacterService {
 		}
 		throw `Attribute Key '${attributeKey}' not found in the passed attribute list`;
 	}
-	
+
 	getAttributeRaceMod(attributeKey: string, raceName: string, className?: string): number {
 		let race = this.ds.getRace(raceName);
 		if (!race) return 0;
-		
+
 		let cClass = this.ds.getClass(className);
 		//if (className && !cClass) throw `Invalid class Name (${className})`;
 
@@ -253,7 +254,7 @@ export class CharacterService {
 				mod.description = this.stringifyArrayOrdinally(mod.description);
 				mod.name = prop + 'ByLevel';
 				mod.value = 1;
-			} else { 
+			} else {
 				mod.value = lookup[attribute.value] * (xref[prop].isPercent ? 100 : 1);
 			}
 
@@ -264,7 +265,7 @@ export class CharacterService {
 		}
 		return mods;
 	}
-	
+
 	getClass(className: string): any {
 		return this.ds.getClass(className);
 	}
@@ -285,7 +286,7 @@ export class CharacterService {
 		}
 		return levels[length-1].level;
 	}
-	
+
 	getClassLevelHpSpecs(className: string, level: number): any {
 		let cClass = this.getClass(className);
 		let levels = cClass.levelProgression;
@@ -300,7 +301,19 @@ export class CharacterService {
 		return spec;
 	}
 
-	
+  getIsArmored(character: Character): boolean {
+    let eq = character.equipment;
+    //if (!eq.gear) return "";
+    let isArmored = eq.some((item) => {
+      if (item.status !== GEAR_STATUS.InUse) return false;
+      if ((<Armor>item).armorClass) return true;
+      if ((<Armor>item).armorClass === 0 ) return true;
+      if ((<Armor>item).armorClassMod) return true;
+      return false
+    })
+    return isArmored;
+  }
+
 	getRace(raceName: string): any {
 		return this.ds.getRace(raceName);
 	}
@@ -308,7 +321,7 @@ export class CharacterService {
 	getRaces(): any[] {
 		return this.ds.getRaces();
 	}
-	
+
 	getAttackTable(character: Character): any {
 		let acZeroHit = this.ds.getAcZeroHit(character.className, character.level || 1);
 		let table = new Table('Attack Table','d20 value needed to hit against AC...','Lvl')
@@ -321,10 +334,10 @@ export class CharacterService {
 			table.addHeader(i);
 			row.addValue(hit);
 		}
-		
+
 		return table;
 	}
-	
+
 	getTurnUndeadTable(character:Character): any {
 		let tableValues;
 		// Clerics get turnUndead Tabel
@@ -335,12 +348,12 @@ export class CharacterService {
 		table.headers = Object.keys(tableValues);
 		let row = table.addValueRow(character.level || 1);
 		row.values = Object.keys(tableValues).map((key) => {return tableValues[key]})
-			
+
 		return table;
 	}
-	
+
 	getThiefSkillsTable(character:Character): any {
-		
+
 		let tableValues = this.ds.getTable('thiefSkills',character);
 		if (!tableValues) return null;
 		let skillMods = this.getThiefSkillMods(character);
@@ -353,9 +366,9 @@ export class CharacterService {
 		row.values = Object.keys(values)
 									.map((key) => {return Math.round(values[key] * 100) + '%'})
 		return table;
-		
+
 	}
-	
+
 	getSpellProgressionTable(character: Character) {
 		let tableValues = this.ds.getTable('spellProgression',character);
 		if (!tableValues) return null;
@@ -365,10 +378,10 @@ export class CharacterService {
 			// we will return this as multiple tables, one for each spell type.
 			// so first we break it out into spell type tables.
 		let table = new Table('Spell Progression','# of memorized spells of level...','Type','Spell Level')
-		
+
 		let rowNames = Object.keys(tableValues);
 		let headers = []
-		
+
 		rowNames.forEach( rowName => {
 			let classTable = tableValues[rowName];
 			let levelTable = classTable[character.level || 1];
@@ -378,7 +391,7 @@ export class CharacterService {
 		headers = Array.from(headerSet);
 		headers.sort();
 		table.headers = headers;
-		
+
 		rowNames.forEach((rowName) => {
 			let row = table.addValueRow(rowName);
 			let classTable = tableValues[rowName];
@@ -387,13 +400,13 @@ export class CharacterService {
 			if (rowName == 'Cleric' || rowName == 'Druid') {
 				levelTable = this.addAdditionalSpells(levelTable, character);
 			}
-			
+
 			row.values = headers.map((key) => {return levelTable[key] || 0;});
 
 		});
 		return table
 	}
-	
+
 	getSavingThrowTable(character: Character): any {
 		let raceName = character.raceName || "Human";
 		let className = character.className || "Fighter";
@@ -402,7 +415,7 @@ export class CharacterService {
 		let row = table.addValueRow(character.level || 1,'text-center');
 
 		for (let i = 0; i < savingThrowNames.length; i++) {
-			let stdObj = this.getSavingThrowDetailObject(savingThrowNames[i], character.level || 1, 
+			let stdObj = this.getSavingThrowDetailObject(savingThrowNames[i], character.level || 1,
 																										className, raceName, character.attributes);
 			let rollNeeded = stdObj.rollTarget - stdObj.raceMod - stdObj.classMod - stdObj.attributeMod;
 
@@ -416,20 +429,20 @@ export class CharacterService {
 
 	getRelevantTables(character: Character): any[] {
 		let tables = [];
-		// Tables are for the specific character level.  They will 
-		// be an object with name, description, and a vlaues object where properties will 
+		// Tables are for the specific character level.  They will
+		// be an object with name, description, and a vlaues object where properties will
 		// be the header and values will be the table values
-		
+
 		// everyone gets an attack table
 		tables.push(this.getAttackTable(character));
-		
+
 		let turnUndead = this.getTurnUndeadTable(character);
 		if (turnUndead) tables.push(turnUndead)
-		
+
 		// Thieves get theifAbility tabler
 		let thiefSkills = this.getThiefSkillsTable(character);
 		if (thiefSkills) tables.push(thiefSkills);
-		
+
 		// Everyone gets saving throws
 		let savingThrows = this.getSavingThrowTable(character);
 		tables.push(savingThrows);
@@ -437,11 +450,11 @@ export class CharacterService {
 		// magic folks get spell-count table
 		let spellProgression = this.getSpellProgressionTable(character);
 		if (spellProgression) tables.push(spellProgression)
-			
+
 		return tables;
 	}
 
-	getSavingThrowDetailObject(savingThrowName: string, level: number, className?: string, 
+	getSavingThrowDetailObject(savingThrowName: string, level: number, className?: string,
 															raceName?: string, attributes?: Attribute[]): SavingThrowDetail {
 		let stdObj = new SavingThrowDetail();
 		stdObj.savingThrowName = savingThrowName;
@@ -452,7 +465,7 @@ export class CharacterService {
 		return stdObj;
 	}
 
-	getSavingThrowList( level: number = 1, raceName: string = 'Human', 
+	getSavingThrowList( level: number = 1, raceName: string = 'Human',
 											className: string = "Fighter", attributes?: Attribute[]): any[] {
 		raceName = raceName || "Human";
 		className = className || "Fighter";
@@ -471,16 +484,16 @@ export class CharacterService {
 	getSpells(className?:string, level?: number): any[] {
 		return this.ds.getSpells(className, level);
 	}
-	
+
 	getThiefSkillList(): string[] {
 		let cClass = this.ds.getClass('Thief');
 		let skills = cClass['thiefSkills'][1]; // there MUST be a skill list for level 1 thief
 		return Object.keys(skills);
 	}
-	
+
 	getThiefSkillMods(character: Character): any {
 		// Get Dexterity Modification
-		let attributes = this.getAdjustedAttributes(character.attributes, 
+		let attributes = this.getAdjustedAttributes(character.attributes,
 																			character.raceName, character.className)
 		let attribute: Attribute = this.getAttributeByAttributeKey('DEX',attributes);
 		let abilityMod = this.getAbilityModByAbility('thiefSkill','DEX',attribute.value);
@@ -488,7 +501,7 @@ export class CharacterService {
 		// a thiefSkill Object with all the skills set to the mod value
 		let skills = this.getThiefSkillList();
 		let abilityModObject = skills.reduce(
-				(skillObj,skill)=> { 
+				(skillObj,skill)=> {
 							skillObj[skill] = abilityMod.value;
 							return skillObj;
 				}, {});
@@ -531,12 +544,12 @@ export class CharacterService {
 		}
 		return validity;
 	}
-	
+
 	getValueInUnits(targetUnit, amount, sourceUnit) {
 		let target = this.ds.getCurrency(targetUnit);
 		let source = this.ds.getCurrency(sourceUnit);
 		if (!target || !source) throw `dataservice: cannot convert ${sourceUnit} to ${targetUnit}`
-		
+
 		amount = source.value * amount / target.value;
 		return amount;
 	}
@@ -622,7 +635,7 @@ export class CharacterService {
 		}
 		return true;
 	}
-	
+
 	ordinalize(input: number): string {
 		let ordinalizers: string[] = ['th','st','nd','rd','th','th','th','th','th','th'];
 		let num = input % 100;
@@ -630,7 +643,7 @@ export class CharacterService {
 		num = num % 10;
 		return input + ordinalizers[num];
 	}
-	
+
 	stringifyArrayOrdinally(a: string[], separator: string = ';'): string {
 		let returnString = '';
 		for (let i = 0; i < a.length; i++) {

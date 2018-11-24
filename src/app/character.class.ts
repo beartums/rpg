@@ -1,3 +1,4 @@
+//import { Equipment } from './character.class';
 //import { Roll } from '.\roll';
 import { Note } from './game.class';
 
@@ -26,7 +27,7 @@ export class Character {
 	alignmentLaw: string;
 	alignmentGood: string;
 	attributes: Attribute[];
-	equipment;
+	equipment: Array<Gear|Weapon|Armor>;
   //treasure: Treasure[];
 	gold: number = 0;
 	stage: STAGE = STAGE.Attributes;

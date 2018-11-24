@@ -1,7 +1,7 @@
 <div class="container">
 	<div class="card" id="characterSheet"  *ngIf="character$ | async as character; else loading">
 		<div class="card-header fancy">
-			<h2>{{character.name}} 
+			<h2>{{character.name}}
 				<small class="text-muted" *ngIf="character.nickname">"{{character.nickname}}"</small>
 			</h2>
 		</div>
@@ -11,21 +11,21 @@
 					<table class="table h-100 my-auto border-0">
 						<tr class="h-100 align-middle text-center border-0">
 							<td class="text-right">
-								<span class="fa fa-heartbeat fa-2x" title="Hitpoints"></span>
+								<span class="fa fa-heartbeat fa-2x" [ngClass]="getHPColorClass(character)" title="Hitpoints"></span>
 							</td>
 							<td class="text-left">
 								<h4>
 									<span *ngIf="character.temporaryHitPoints || character.temporaryHitPoints===0">
-										{{character.temporaryHitPoints}}/</span>{{character.hitPoints}}</h4>
+										{{character.temporaryHitPoints}}/</span>{{character.hitPoints}} </h4>
 							</td>
 							<td class="text-right">
-								<span class="ra ra-shield ra-2x" title="Armor Class"></span>
+								<span class="ra ra-shield ra-2x" [ngClass]="getACColorClass(character)" title="Armor Class"></span>
 							</td>
 							<td class="text-left">
-								<h4>{{getArmoredAc(character)}}</h4>
+								<h4>{{getAc(character)}}</h4>
 							</td>
 							<td class="text-right">
-								<span class="ra ra-gold-bar ra-2x" title="Gold"></span>
+								<span class="ra ra-gold-bar ra-2x gold" title="Gold"></span>
 							</td>
 							<td class="text-left">
 								<h4>{{character.gold | number:'0.0-2'}}</h4>
@@ -53,7 +53,7 @@
 						</div>
 						<div class="mx-auto">
 							Alignment: <strong>{{character.alignmentLaw}}/{{character.alignmentGood}}</strong>
-						</div>	
+						</div>
 				</div>
 			</div>
 			<div class="row">

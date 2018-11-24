@@ -1,7 +1,7 @@
 	<h2>Character Sheet</h2>
 	<div class="row" *ngIf="character; else loadingBig">
 		<!-- Character Creation Left Half -->
-		<div class="col-md-6">
+		<div class="col-md-8">
 
 			<!-- CHARACTER DETAILS -->
 			<div class="row">
@@ -26,7 +26,7 @@
 					</create-character-attributes>
 				</div>
 			</div>
-			
+
 			<!-- EQUIPMENT -->
 			<div class='row' *ngIf="character.stage > STAGE.Details">
 					<div class="col-md-12">
@@ -37,28 +37,28 @@
 										<h5>Equipment</h5>
 									</div>
 									<div class="col-5 text-right">
-										
-											
+
+
 
 											&nbsp;
-											
+
 											<button type="button" class="btn btn-sm" (click)="toggleEquipmentStage(character)"
 															[disabled]='character.stage > STAGE.Spells
 																					|| character.stage < STAGE.Details
 																					|| status.isLocked'>
-												<span class="fa" 
+												<span class="fa"
 													[ngClass]="{'fa-unlock': character.stage == STAGE.Equipment && !status.isLocked,
 																			'fa-lock': character.stage != STAGE.Equipment  || status.isLocked}">
 												</span>
 											</button>
 
-			
+
 									</div>
 								</div>
 							</div>
 
 							<div class="card-body">
-							
+
 								<div class='col-md-12'>
 									<ngb-tabset>
 										<ngb-tab title="My Stuff">
@@ -74,7 +74,7 @@
 
 											</ng-template>
 										</ngb-tab>
-										<ngb-tab title="Shopping Cart" 
+										<ngb-tab title="Shopping Cart"
 														*ngIf="character.stage==STAGE.Equipment && !status.isLocked ">
 											<ng-template ngbTabContent>
 												<select-gear [(targetEquipment)]="character.equipment"
@@ -90,9 +90,9 @@
 					</div>
 				</div>
 		</div>
-		
+
 		<!--Reference: Right Half -->
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<ngb-tabset type="pills">
 				<ngb-tab title="Races">
 					<ng-template ngbTabContent>
@@ -120,17 +120,17 @@
 							<ngb-tab title="Ability Mods" class="small" *ngIf="character.attributes && character.attributes.length>0">
 								<ng-template ngbTabContent>
 									<table class="table table-specs">
-										<ng-container *ngFor="let ability of cs.getAttributeAbilityModList(getAdjustedAttributes(character))">
-											<tr *ngIf="ability.value && ability.value!=0 
-																	&& !isNaN(ability.value) 
+										<ng-container *ngFor="let ability of cs.getAttributeAbilityModList(cs.getAdjustedAttributes(character))">
+											<tr *ngIf="ability.value && ability.value!=0
+																	&& !isNaN(ability.value)
 																	&& (!character.className || isIn(ability.classes,character.className))"
 													[ngClass]="{'text-warning':!character.className && ability.classes}">
 												<td>
 													{{ability.name | caseConvert: 'FC'}}
 												</td>
-												<td class="text-right"> 
+												<td class="text-right">
 													<span *ngIf="ability.type=='MOD'">
-														{{ability.value < 0 ? ability.value : "+" + ability.value}}  
+														{{ability.value < 0 ? ability.value : "+" + ability.value}}
 														{{ability.isPercent ? "%" : ""}}
 													</span>
 													<span *ngIf="ability.type=='VALUE'">
@@ -158,16 +158,16 @@
 				</ngb-tab>
 				<!--ngb-tab title="Equipment">
 					<ng-template ngbTabContent>
-						<equipment [isShopping]="isCartShowing" [(cart)]="cart" 
+						<equipment [isShopping]="isCartShowing" [(cart)]="cart"
 											[showQuantity]="isCartShowing" [showTotals]="false"></equipment>
 					</ng-template>
 				</ngb-tab-->
-				
+
 			</ngb-tabset>
 		</div>
 	</div>
 
-<ng-template #genericModal let-c="close" let-d="dismiss">
+<!--ng-template #genericModal let-c="close" let-d="dismiss">
 	<div class="modal-header">
 		<h4 class="modal-title">{{modal.title}}</h4>
 		<button type="button" class="close" aria-label="Close" (click)="c('cancel')">
@@ -181,7 +181,7 @@
 		<button type="button" class="btn btn-default" (click)="c('cancel')">{{modal.cancelButton}}</button>
 		<button type="button" class="btn btn-default" (click)="d('continue')">{{modal.continueButton}}</button>
 	</div>
-<ng-template>
+<ng-template-->
 <ng-template #loadingBig>
 	<span class="fa fa-spin fa-spinner fa-5x"></span>
 </ng-template>
