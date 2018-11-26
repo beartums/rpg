@@ -18,6 +18,7 @@ import { AppComponent }  from './app.component';
 
 import { AuthComponent } from './auth/auth.component';
 import { CharacterService } from './character.service';
+import { TableService } from './shared/table.service';
 
 //import { GmComponent } from './gm/gm.component';
 import { GmModule } from './gm/gm.module';
@@ -34,7 +35,7 @@ import { AppRoutingModule } from './app-routing.module';
                   AuthComponent,
 							],
   bootstrap:    [ AppComponent ],
-	providers: [ AuthService, DataService, CharacterService ],
+	providers: [ AuthService, DataService, CharacterService, TableService ],
 	exports: [ FormsModule],
 })
 export class AppModule { }

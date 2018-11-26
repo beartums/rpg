@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Character, Attribute, STAGE, Gear } from '../character.class';
 import { CharacterService } from '../character.service';
 import { DataService } from '../data.service';
+import {TableService} from '../shared/table.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -35,7 +36,8 @@ export class CharacterCreationComponent implements OnInit {
   infoClass: string;
 
 	constructor(public cs: CharacterService, private ds: DataService,
-							private router: Router, private route: ActivatedRoute) {
+              private router: Router, private route: ActivatedRoute,
+              private ts: TableService) {
 	}
 
 	ngOnInit() {
@@ -77,7 +79,7 @@ export class CharacterCreationComponent implements OnInit {
 		if (character.stage == STAGE.Equipment) {
 			// HACKY: spell progression tables will be null if there are no current spells
 			// for this character
-			character.stage = this.cs.getSpellProgressionTable(character) ? STAGE.Spells : STAGE.Complete;
+			character.stage = this.ts.getSpellProgressionTable(character) ? STAGE.Spells : STAGE.Complete;
 		} else {
 			character.stage = STAGE.Equipment;
 		}

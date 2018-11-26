@@ -65,8 +65,8 @@ export class Gear {
 }
 
 export class Weapon extends Gear {
-	oneHandDamage: string;					 // roll notation
-	twoHandDamage: string;
+	oneHandDamage?: string;					 // roll notation
+	twoHandDamage?: string;
 }
 export class Armor extends Gear {
 	armorClass: number;

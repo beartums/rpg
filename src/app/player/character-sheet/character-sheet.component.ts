@@ -32,24 +32,23 @@ export class CharacterSheetComponent implements OnInit {
 	ngOnInit() {
 		this.route.paramMap.subscribe( params => {
 			this.characterKey = params.get('key');
-			//this.userId = params.get('userId');
       this.character$ = this.ds.fetchCharacter$(this.characterKey);
-
-			//this.character$.subscribe( character => {this.character = character} )
 		})
   }
 
-  ngAfterViewChecked() {
-  //  this.cdr.detectChanges()
-  }
 
-	getArmoredAc(character: Character): number {
-		return this.cs.getArmoredArmorClass(character);
-  }
-  getAc(character: Character): number {
+	getAc(character: Character): number {
 		return this.cs.getArmoredArmorClass(character);
   }
 
+  /**
+   * Change the color of the Heart (HP Icon) based on current damage
+   *
+   * @param {Character} character
+   * @returns {string} Name of class corresponding to color
+   *
+   * @memberOf CharacterSheetComponent
+   */
   getHPColorClass(character:Character): string {
     let hp = character.hitPoints || 1;
     let thp = character.temporaryHitPoints;
@@ -59,24 +58,51 @@ export class CharacterSheetComponent implements OnInit {
     else if (hpPercent>.6) return "hurt"
     else if (hpPercent>.3) return "hurt"
     else if (hpPercent>.1) return "hurt-badly"
-    else return "dead";
+    else return "dead fa-1x";
   }
 
+  /**
+   * Shield Icon should turn green if the character has any armor
+   *
+   * @param {Character} character
+   * @returns {string} 'text-success' if the character is armored
+   *
+   * @memberOf CharacterSheetComponent
+   */
   getACColorClass(character:Character): string {
      if (this.cs.getIsArmored(character)) return 'text-success';
      else return "";
- }
+  }
 
-	getItemProperties(item: any): string {
-		let props = [];
-		if (item.armorClass) props.push('AC: ' + item.armorClass);
-		if (item.oneHandDamage) props.push('1H: ' + item.oneHandDamage);
-		if (item.twoHandDamage) props.push('2H: ' + item.twoHandDamage);
-		if (item.armorClassMod) props.push('ACMod: ' + item.armorClassMod);
+  /**
+   * String relaying Attack and protection info about the item
+   *
+   * @param {*} item Item to
+   * @returns {string} Concatenated string of properties
+   *
+   * @memberOf CharacterSheetComponent
+   */
+  getItemProperties(item: Gear | Armor | Weapon): string {
+    let props = [];
+    if (item instanceof Armor) {
+      if (item.armorClassMod) props.push('ACMod: ' + item.armorClassMod);
+      if (item.armorClass) props.push('AC: ' + item.armorClass);
+    } else if (item instanceof Weapon) {
+      if (item.oneHandDamage) props.push('1H: ' + item.oneHandDamage);
+      if (item.twoHandDamage) props.push('2H: ' + item.twoHandDamage);
+    }
 		return props.join('; ');
 	}
 
-	getWeight(character): number {
+  /**
+   * Get the weight of the items currently carried by the character
+   *
+   * @param {Character} character
+   * @returns {number} Weight in pounds of all items the character is carrying
+   *
+   * @memberOf CharacterSheetComponent
+   */
+  getWeight(character: Character): number {
 		if (!character || ! character.equipment) return 0;
 		let gear = character.equipment;
 		let weight:number = gear.reduce( (wt: number,item: Gear) => {
@@ -88,7 +114,15 @@ export class CharacterSheetComponent implements OnInit {
 		return weight;
 	}
 
-	getValue(character): number {
+  /**
+   * Get the value of an equipment list form a character
+   *
+   * @param {any} character
+   * @returns {number} GP value of the equipment list
+   *
+   * @memberOf CharacterSheetComponent
+   */
+  getValue(character): number {
 		if (!character || ! character.equipment) return 0;
 		let gear = character.equipment;
 		let value:number = gear.reduce( (val: number,item: Gear) => {
@@ -98,7 +132,8 @@ export class CharacterSheetComponent implements OnInit {
 					return val;
 		}, 0);
 		return value;
-	}
+  }
+
 	toggleInUse(item: Gear, character: Character) {
 		if (item.status != GEAR_STATUS.InUse) {
 			item.status = GEAR_STATUS.InUse;
