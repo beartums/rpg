@@ -16,7 +16,8 @@
     "import-spacing": true,
     "indent": [
       true,
-      "spaces"
+      "tab",
+      2
     ],
     "interface-over-type-literal": true,
     "label-position": true,
@@ -30,6 +31,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "newline-per-chained-call": true,
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [
@@ -47,11 +49,15 @@
     "no-empty-interface": true,
     "no-eval": true,
     "no-inferrable-types": true,
+    "no-redundant-jsdoc": true,
     "no-shadowed-variable": true,
     "no-string-literal": false,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": [
+      true,
+      "ignore-blank-lines"
+    ],
     "no-unused-expression": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,

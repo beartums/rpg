@@ -12,7 +12,7 @@ import { environment } from '../environments/environment';
 @Injectable()
 export class AuthService {
   public user: Observable<firebase.User|any>;
-	
+
 	_offlineUser = {
 		displayName: 'offline player',
 		email: 'ric+offline@griffithnet.com',
@@ -20,13 +20,13 @@ export class AuthService {
 		uid: 'xb0gzTfBzjgQ7Fc8e2O5L2XtciH3',
 		photoURL: 'no/photo/here.jpg'
 	}
-			
+
 	userData: any;
-	private _isLoggedIn: boolean = false;
-	private _isGm: boolean = false;
+	private _isLoggedIn = false;
+	private _isGm = false;
 	private _isLoggedIn$: Observable<boolean>;
 	private _isGm$: Observable<boolean>;
-	
+
 	get isLoggedIn(): boolean {	return this._isLoggedIn; }
 	get isGm(): boolean {	return this._isGm; }
 	get isLoggedIn$(): Observable<boolean> {	return this._isLoggedIn$; }
@@ -34,59 +34,90 @@ export class AuthService {
 	get userEmail(): string { return this.userData.email }
 	get userDisplayName(): string { return this.userData.displayName; }
 	get userId(): string { return this.userData.uid }
-	//get user(): any { return this.userData; }
 
   constructor(private firebaseAuth: AngularFireAuth, router: Router) {
 
-		this.user = !environment.offline ? firebaseAuth.authState : of(this._offlineUser);
-		this._isGm$ = this.user.map(user=> { return this.isUserGm(user) });
-		this._isLoggedIn$ = this.user.map(user=> { return user ? true : false });
+    // Wanted to do some offline programming at the hairy lemon, so tried to override the user info
+    // here.  Never got this working properly (partly because there was a lot to do at the hairy lemon)
+    this.user = !environment.offline ? firebaseAuth.authState : of(this._offlineUser);
+
+    // Set private observables -- used mostly by AuthGuards
+		this._isGm$ = this.user.map(user => this.isUserGm(user));
+    this._isLoggedIn$ = this.user.map(user => user ? true : false);
+
+    // Subscribe to the user observable to handle login state changes and set private
+    // non-observable state properties
 		this.user.subscribe(user => {
-			let isNew = !this.userData;
 			this.userData = user;
 			if (user) {
+        // Set loggedin and GM status
 				this._isLoggedIn = true;
-				this._isGm = this.isUserGm(user) ;
-				//if (isNew) router.navigate(['character-creation']);
+				this._isGm = this.isUserGm(user);
 			} else {
+        // Set logged out and GM status.  Also clear out the userdata
 				this._isLoggedIn = false;
-				this._isGm = false;
+        this._isGm = false;
+        this.userData = null;
 			}
 		});
   }
 
-	isUserGm(user): boolean {
-		return user.email.substr(0,4).toLowerCase() === 'eric';
+  /**
+   * Test is the user is a Game master
+   * @param user Currently logged in user
+   * @returns True if user is a gm
+   */
+	isUserGm(user: firebase.User): boolean {
+    return user.email.substr(0, 4)
+      .toLowerCase() === 'eric';
 	}
-	
+
+  /**
+   * Sign up with email and password (not used)
+   * @param email Email of person signing up
+   * @param password Password of same person
+   */
   signupWithEmail(email: string, password: string) {
     this.firebaseAuth.auth.createUserWithEmailAndPassword(email, password)
       .then(value => {
         console.log('Success!', value);
       })
       .catch(err => {
-        console.log('Something went wrong:',err.message);
-      });    
+        console.log('Something went wrong:', err.message);
+      });
   }
 
+  /**
+   * Login using email and password (Unused)
+   * @param email Email of logger inner
+   * @param password password of logger inner
+   */
   loginWithEmail(email: string, password: string) {
     this.firebaseAuth.auth.signInWithEmailAndPassword(email, password)
       .then(value => {
         console.log('Nice, it worked!');
       })
       .catch(err => {
-        console.log('Something went wrong:',err.message);
+        console.log('Something went wrong:', err.message);
       });
   }
+
+  /**
+   * Google OAuth login
+   */
   loginWithGoogle() {
     this.firebaseAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
 			.then(value => {
         console.log(value);
       })
       .catch(err => {
-        console.log('Something went wrong:',err.message);
+        console.log('Something went wrong:', err.message);
       });
   }
+
+  /**
+   * Just what it says.  Log Out.
+   */
   logout() {
     this.firebaseAuth.auth.signOut();
   }

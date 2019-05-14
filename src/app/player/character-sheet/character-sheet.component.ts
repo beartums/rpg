@@ -134,8 +134,16 @@ export class CharacterSheetComponent implements OnInit {
 		return value;
   }
 
+  /**
+   * Toggle item from inUse to Stowed
+   *
+   * @param {Gear} item Item to toggle
+   * @param {Character} character Character who owns item
+   *
+   * @memberOf CharacterSheetComponent
+   */
 	toggleInUse(item: Gear, character: Character) {
-		if (item.status != GEAR_STATUS.InUse) {
+		if (item.status !== GEAR_STATUS.InUse) {
 			item.status = GEAR_STATUS.InUse;
 		} else {
 			item.status = GEAR_STATUS.Stowed;

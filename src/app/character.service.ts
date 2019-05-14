@@ -313,6 +313,7 @@ export class CharacterService {
 
   getIsArmored(character: Character): boolean {
     let eq = character.equipment;
+    if (!eq || !eq.length) return false;
     //if (!eq.gear) return "";
     let isArmored = eq.some((item) => {
       if (item.status !== GEAR_STATUS.InUse) return false;
